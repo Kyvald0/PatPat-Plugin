@@ -25,17 +25,16 @@ public class PatTranslator implements Translator {
 
 	private final Map<String, Map<String, String>> localizations = new HashMap<>();
 
-
 	@SneakyThrows
 	public PatTranslator() {
-		List<String> filenames = builtinListLangResources();
-		PatLogger.info(String.valueOf(filenames));
+		List<String> filenames = getBuiltinLangFiles();
+		PatLogger.debug("Found builtin lang files: " + filenames);
 		for (String filename : filenames) {
 			readLangResource(filename);
 		}
 	}
 
-	private static List<String> builtinListLangResources() throws IOException {
+	private static List<String> getBuiltinLangFiles() throws IOException {
 		URL url = PatPatPlugin.getInstance().getClass().getClassLoader().getResource(LANG_FOLDER);
 		if (url == null) {
 			return Collections.emptyList();
@@ -43,8 +42,8 @@ public class PatTranslator implements Translator {
 		if (!Objects.equals(url.getProtocol(), "jar")) {
 			return Collections.emptyList();
 		}
-		JarURLConnection conn = (JarURLConnection) url.openConnection();
-		try (JarFile jar = conn.getJarFile()) {
+		JarURLConnection connection = (JarURLConnection) url.openConnection();
+		try (JarFile jar = connection.getJarFile()) {
 			return jar.stream()
 					.sequential()
 					.filter(entry -> !entry.isDirectory()
@@ -64,7 +63,7 @@ public class PatTranslator implements Translator {
 		// Fix single quotes
 		langResource.replaceAll((k, v) -> langResource.get(k).replace("'", "''"));
 
-		localizations.computeIfAbsent(lang, k -> new HashMap<>()).putAll(langResource);
+		this.localizations.computeIfAbsent(lang, k -> new HashMap<>()).putAll(langResource);
 	}
 
 	@Override
@@ -72,18 +71,19 @@ public class PatTranslator implements Translator {
 		return Key.key("patpat:translator");
 	}
 
+	@Nullable
 	@Override
-	public @Nullable MessageFormat translate(@NotNull String key, @NotNull Locale locale) {
+	public MessageFormat translate(@NotNull String key, @NotNull Locale locale) {
 		if (!key.startsWith("patpat")) {
 			return null;
 		}
 		String lang = locale.toLanguageTag();
-		Map<String, String> localization = localizations.getOrDefault(lang, null);
+		Map<String, String> localization = this.localizations.getOrDefault(lang, null);
 		if (localization == null) {
-			String message = localizations.get(DEFAULT_LANG).getOrDefault(key, null);
+			String message = this.localizations.get(DEFAULT_LANG).getOrDefault(key, null);
 			return message == null ? null : new MessageFormat(message);
 		}
-		String message = localization.getOrDefault(key, localizations.get(DEFAULT_LANG).getOrDefault(key, null));
+		String message = localization.getOrDefault(key, this.localizations.get(DEFAULT_LANG).getOrDefault(key, null));
 		return message == null ? null : new MessageFormat(message);
 	}
 }

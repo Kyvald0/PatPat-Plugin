@@ -8,6 +8,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import net.lopymine.patpat.plugin.*;
+import net.lopymine.patpat.plugin.config.Version;
 import net.lopymine.patpat.plugin.extension.PlayerExtension;
 import net.lopymine.patpat.plugin.packet.PatPatPacketManager;
 
@@ -23,14 +24,14 @@ public class PatPatPlayerEventHandler implements Listener {
 	public void onJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		PatPatPacketManager.PLAYER_PROTOCOLS.put(player.getUniqueId(), Version.PACKET_V1_VERSION);
-		PatLogger.debug("Player joined " + player.getName());
+		PatLogger.debug("Player %s joined", player.getName());
 	}
 
 	@EventHandler
 	public void onQuit(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
 		PatPatPacketManager.PLAYER_PROTOCOLS.remove(player.getUniqueId());
-		PatLogger.debug("Player quit " + player.getName());
+		PatLogger.debug("Player %s quit", player.getName());
 	}
 
 }

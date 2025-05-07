@@ -4,7 +4,6 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 
-import net.lopymine.patpat.plugin.Version;
 import net.lopymine.patpat.plugin.config.adapter.VersionAdapter;
 
 @Getter

@@ -1,7 +1,7 @@
 package net.lopymine.patpat.plugin.config.migrate;
 
 import net.lopymine.patpat.plugin.*;
-import net.lopymine.patpat.plugin.config.PatPatConfig;
+import net.lopymine.patpat.plugin.config.*;
 
 import java.io.File;
 import java.util.*;
@@ -31,11 +31,13 @@ public class MigrateManager {
 			}
 			String migrateVersion = handler.getVersion();
 			if (!handler.migrate()) {
-				PatLogger.warn("Error migrate config from version: " + migrateVersion);
-				PatLogger.warn("Report the issue at github page: {}, attaching your config and specifying the mod and server versions.", ISSUE_LINK);
+				PatLogger.error("-----------------------");
+				PatLogger.error("Failed to migrate plugin config from version: %s", migrateVersion);
+				PatLogger.error("Report the issue at github page: %s, attaching your config and specifying the mod and server versions.", ISSUE_LINK);
+				PatLogger.error("-----------------------");
 				return;
 			}
-			PatLogger.info("Config successful migrated from version: " + migrateVersion);
+			PatLogger.info("Config successful migrated from version: ", migrateVersion);
 		}
 	}
 
@@ -45,12 +47,12 @@ public class MigrateManager {
 			return;
 		}
 		if (version.isMoreThan(Version.SERVER_CONFIG_VERSION)) {
-			PatLogger.warn("Your config version is higher than the mod's (%s > %s). This may cause errors!".formatted(version, Version.SERVER_CONFIG_VERSION));
-			PatLogger.warn("Update the mod to avoid issues.");
+			PatLogger.warn("Your config version is higher than the plugin's (%s > %s). This may cause errors!", version, Version.SERVER_CONFIG_VERSION);
+			PatLogger.warn("Please update the plugin to avoid issues.");
 			return;
 		}
-		PatLogger.warn("Your config version is lower than the mod's (%s < %s). This may cause errors!".formatted(version, Version.SERVER_CONFIG_VERSION));
-		PatLogger.warn("Back up your config and report the issue at github page: {}, attaching your config and specifying the mod and server versions.", ISSUE_LINK);
+		PatLogger.warn("Your config version is lower than the plugin's (%s < %s). This may cause errors!", version, Version.SERVER_CONFIG_VERSION);
+		PatLogger.warn("Back up your config and report the issue at github page: %s, attaching your config and specifying the mod and server versions.", ISSUE_LINK);
 	}
 
 	private static void addHandlers(MigrateHandler... handlers) {

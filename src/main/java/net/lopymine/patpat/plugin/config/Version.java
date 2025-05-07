@@ -1,13 +1,16 @@
-package net.lopymine.patpat.plugin; // TODO переместить в более правильное место
+package net.lopymine.patpat.plugin.config; // TODO переместить в более правильное место
+
+import net.lopymine.patpat.plugin.PatPatPlugin;
 
 import org.jetbrains.annotations.NotNull;
 
-public record Version(int major, int minor, int patch) {
+public record Version(int major, int minor, int patch) implements Comparable<Version> {
 
+	public static final Version PLUGIN_VERSION;
 	public static final Version SERVER_CONFIG_VERSION = Version.of("1.0.0");
 
-	public static final Version PACKET_V1_VERSION = Version.of("1.0.0");
 	public static final Version PACKET_V2_VERSION = Version.of("1.2.0");
+	public static final Version PACKET_V1_VERSION = Version.of("1.0.0");
 
 	public static Version of(@NotNull String version) {
 		String[] numbers = version.split("\\.");
@@ -67,5 +70,15 @@ public record Version(int major, int minor, int patch) {
 	@Override
 	public String toString() {
 		return "%d.%d.%d".formatted(this.major, this.minor, this.patch);
+	}
+
+	static {
+		String pluginVersion = PatPatPlugin.getInstance().getDescription().getVersion();
+		PLUGIN_VERSION = Version.of(pluginVersion.substring(0, pluginVersion.indexOf('+')));
+	}
+
+	@Override
+	public int compareTo(@NotNull Version o) {
+		return o.is(this) ? 0 : o.isMoreThan(this) ? 1 : -1;
 	}
 }

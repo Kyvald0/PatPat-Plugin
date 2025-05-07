@@ -32,7 +32,7 @@ public class PatPatPlugin extends JavaPlugin {
 		instance  = this;
 		adventure = BukkitAudiences.create(this);
 		if (!this.getDataFolder().exists() && !this.getDataFolder().mkdirs()) {
-			PatLogger.warn("Failed to create data folder for PatPat Plugin!");
+			PatLogger.warn("Failed to create config folder for PatPat Plugin!");
 		}
 		MigrateManager.migrate();
 		PatPatConfig.reload();

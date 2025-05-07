@@ -51,8 +51,9 @@ public class PlayerListConfig {
 		if (!CONFIG_FILE.exists()) {
 			try {
 				Files.createFile(CONFIG_FILE.toPath());
-			} catch (IOException e) {
-				PatLogger.error("Failed to create %s config file!".formatted(FILENAME), e);
+			} catch (Exception e) {
+				PatLogger.error("Failed to create PlayerListConfig:", e);
+				return false;
 			}
 		}
 		return CONFIG_FILE.exists();
@@ -60,7 +61,7 @@ public class PlayerListConfig {
 
 	public static void reload() {
 		if (!create()) {
-			PatLogger.error("Failed to reload PlayerListConfig file!");
+			PatLogger.error("Failed to reload PlayerListConfig!");
 			return;
 		}
 		PlayerListConfig config = new PlayerListConfig();
@@ -77,9 +78,9 @@ public class PlayerListConfig {
 			}
 			instance = config;
 		} catch (IllegalArgumentException e) {
-			PatLogger.error("Error line %d: '%s' is not uuid, file %s", lineNumber, line == null ? "null" : line, FILENAME);
-		} catch (IOException e) {
-			PatLogger.error("Failed to read " + FILENAME, e);
+			PatLogger.error("Failed to parse line %d in PlayerListConfig: '%s' is not uuid!", lineNumber, line == null ? "null" : line);
+		} catch (Exception e) {
+			PatLogger.error("Failed to reload PlayerListConfig:", e);
 		}
 	}
 
@@ -92,7 +93,7 @@ public class PlayerListConfig {
 					.collect(Collectors.joining("\n"))
 			);
 		} catch (Exception e) {
-			PatLogger.error("Failed to save " + FILENAME, e);
+			PatLogger.error("Failed to save PlayerListConfig:", e);
 		}
 	}
 }

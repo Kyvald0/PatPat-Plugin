@@ -20,23 +20,22 @@ public class MigrateVersion0 implements MigrateHandler {
 		String filename = file.getName();
 		File backupFolder = MigrateManager.CONFIG_FOLDER.toPath().resolve("backup").toFile();
 		if ((!backupFolder.exists() || !backupFolder.isDirectory()) && !backupFolder.mkdir()) {
-			PatLogger.error("Failed to create backup folder");
+			PatLogger.error("Failed to create PatPat Plugin backup folder");
 			return false;
 		}
-
 		try {
 			Files.copy(file.toPath(), backupFolder.toPath().resolve(filename + ".bkp"), StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException e) {
-			PatLogger.error("Failed to create old config backup for " + filename, e);
+		} catch (Exception e) {
+			PatLogger.error("Failed to create backup for old config:", e);
 			return false;
 		}
 		return true;
 	}
 
 	@Nullable
-	public PlayerListConfig transformPlayerList(File oldPlayerList) {
+	public PlayerListConfig transformPlayerList(File oldFile) {
 		PlayerListConfig playerListConfig = new PlayerListConfig();
-		try (FileReader reader = new FileReader(oldPlayerList)) {
+		try (FileReader reader = new FileReader(oldFile)) {
 			JsonObject rootObj = JsonParser.parseReader(reader).getAsJsonObject();
 			JsonArray array = rootObj.get("uuids").getAsJsonArray();
 			for (JsonElement element : array) {
@@ -44,10 +43,10 @@ public class MigrateVersion0 implements MigrateHandler {
 				playerListConfig.add(UUID.fromString(uuid), "?");
 			}
 		} catch (FileNotFoundException e) {
-			PatLogger.warn("Failed to read file " + oldPlayerList.getName(), e);
+			PatLogger.warn("Failed to find PlayerListConfig:", e);
 			return null;
-		} catch (IOException e) {
-			PatLogger.warn("Failed to parse file " + oldPlayerList.getName(), e);
+		} catch (Exception e) {
+			PatLogger.error("Failed to read PlayerListConfig:", e);
 			return null;
 		}
 		return playerListConfig;
@@ -66,8 +65,8 @@ public class MigrateVersion0 implements MigrateHandler {
 		if (oldConfig.exists() && createBackup(oldConfig)) {
 			try {
 				Files.delete(oldConfig.toPath());
-			} catch (IOException e) {
-				PatLogger.warn("Failed to delete old config " + oldConfig.getName(), e);
+			} catch (Exception e) {
+				PatLogger.error("Failed to delete old PatPatConfig:", e);
 				return false;
 			}
 		}
@@ -81,7 +80,7 @@ public class MigrateVersion0 implements MigrateHandler {
 		}
 
 		if (!createBackup(oldPlayerList)) {
-			PatLogger.warn("Failed to create backup for " + oldPlayerList.getName());
+			PatLogger.error("Failed to create backup for PlayerListConfig:");
 			return false;
 		}
 		PlayerListConfig playerListConfig = transformPlayerList(oldPlayerList);
@@ -90,8 +89,8 @@ public class MigrateVersion0 implements MigrateHandler {
 		}
 		try {
 			Files.delete(oldPlayerList.toPath());
-		} catch (IOException e) {
-			PatLogger.warn("Failed to delete old config " + oldPlayerList.getName(), e);
+		} catch (Exception e) {
+			PatLogger.error("Failed to delete old PlayerListConfig:", e);
 			return false;
 		}
 		playerListConfig.save();

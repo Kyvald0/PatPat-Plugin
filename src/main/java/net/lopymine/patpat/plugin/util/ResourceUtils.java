@@ -25,10 +25,13 @@ public class ResourceUtils {
 	@Nullable
 	public static String loadFileFromJar(String filename) {
 		try (InputStream inputStream = PatPatPlugin.getInstance().getClass().getClassLoader().getResourceAsStream(filename)) {
-			assert (inputStream != null);
-			return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+			if (inputStream != null) {
+				return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+			} else {
+				PatLogger.error("Failed to find `%s` in the jar file".formatted(filename));
+			}
 		} catch (Exception e) {
-			PatLogger.error("Failed to open `%s` in jar".formatted(filename), e);
+			PatLogger.error("Failed to open `%s` in the jar file".formatted(filename), e);
 		}
 		return null;
 	}
@@ -36,12 +39,15 @@ public class ResourceUtils {
 	@Nullable
 	public static Map<String, String> loadLangFromJar(String filename) {
 		try (InputStream inputStream = PatPatPlugin.getInstance().getClass().getClassLoader().getResourceAsStream(filename)) {
-			assert (inputStream != null);
-			return GSON.fromJson(new InputStreamReader(inputStream), MAP_TYPE);
+			if (inputStream != null) {
+				return GSON.fromJson(new InputStreamReader(inputStream), MAP_TYPE);
+			} else {
+				PatLogger.error("Failed to find `%s` in the jar file".formatted(filename));
+			}
 		} catch (JsonSyntaxException e) {
-			PatLogger.error("Failed to read json from `%s` in jar".formatted(filename), e);
+			PatLogger.error("Failed to read json from `%s` in the jar file".formatted(filename), e);
 		} catch (IOException e) {
-			PatLogger.error("Failed to open `%s` in jar".formatted(filename), e);
+			PatLogger.error("Failed to open `%s` in the jar file".formatted(filename), e);
 		}
 		return null;
 	}

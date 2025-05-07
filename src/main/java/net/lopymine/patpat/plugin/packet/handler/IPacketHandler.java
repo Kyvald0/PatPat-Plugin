@@ -7,6 +7,8 @@ public interface IPacketHandler {
 
 	void handle(Player sender, ByteArrayDataInput buf);
 
-	String getIncomingPacketID();
+	String getIncomingPacketId();
+
+	String getOutgoingPacketId();
 
 }

@@ -2,69 +2,57 @@ package net.lopymine.patpat.plugin.packet.handler;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
+import lombok.experimental.ExtensionMethod;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import net.lopymine.patpat.plugin.PatLogger;
-import net.lopymine.patpat.plugin.PatPatPlugin;
+import net.lopymine.patpat.plugin.*;
+import net.lopymine.patpat.plugin.config.Version;
+import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
 import net.lopymine.patpat.plugin.packet.PatPatPacketManager;
 
 import java.io.IOException;
 import org.jetbrains.annotations.Nullable;
 
+@ExtensionMethod(ByteArrayDataExtension.class)
 public class PatPacketHandlerV2 extends PatPacketHandler {
 
 	@Override
-	public String getIncomingPacketID() {
-		return PatPatPacketManager.PATPAT_C2S_PACKET_V2_ID;
+	public String getIncomingPacketId() {
+		return PatPatPacketManager.PATPAT_C2S_PACKET_ID_V2;
 	}
 
 	@Override
-	protected byte[] getOutgoingPacketBytes(Entity pattedEntity, Entity whoPattedEntity, ByteArrayDataOutput output) {
-		writeVarInt(output, pattedEntity.getEntityId());
-		writeVarInt(output, whoPattedEntity.getEntityId());
-		return output.toByteArray();
+	public String getOutgoingPacketId() {
+		return PatPatPacketManager.PATPAT_S2C_PACKET_ID_V2;
+	}
+
+	@Override
+	public Version getPacketVersion() {
+		return Version.PACKET_V2_VERSION;
 	}
 
 	@Override
 	@Nullable
 	protected Entity getPattedEntity(PatPatPlugin plugin, Player sender, ByteArrayDataInput buf) {
 		try {
-			int entityId = readVarInt(buf);
-			for (Entity entity : sender.getWorld().getEntities()) {
+			int entityId = buf.readVarInt();
+			for (Entity entity : sender.getWorld().getEntities()) { // TODO Should we do smthg with this????
 				if (entity.getEntityId() != entityId) {
 					continue;
 				}
 				return entity;
 			}
-		} catch (IOException e) {
-			PatLogger.warn("Failed parse entityId from incoming packet from player %s[%s]!".formatted(sender.getName(), sender.getUniqueId()), e);
+		} catch (Exception e) {
+			PatLogger.warn("Failed to parse entityId from incoming packet from player %s[%s]! Ignoring packet.".formatted(sender.getName(), sender.getUniqueId()), e);
 		}
 		return null;
 	}
 
-	private static int readVarInt(ByteArrayDataInput buf) throws IOException {
-		int i = 0;
-		int j = 0;
-
-		byte b;
-		do {
-			b = buf.readByte();
-			i |= (b & 127) << j++ * 7;
-			if (j > 5) {
-				throw new IOException("VarInt too big");
-			}
-		} while ((b & 128) == 128);
-
-		return i;
-	}
-
-	private static void writeVarInt(ByteArrayDataOutput output, int value) {
-		while ((value & -128) != 0) {
-			output.writeByte(value & 127 | 128);
-			value >>>= 7;
-		}
-
-		output.writeByte(value);
+	@Override
+	public byte[] getOutgoingPacketBytes(Entity pattedEntity, Entity whoPattedEntity, ByteArrayDataOutput output) {
+		output.writeVarInt(pattedEntity.getEntityId());
+		output.writeVarInt(whoPattedEntity.getEntityId());
+		return output.toByteArray();
 	}
 }

@@ -51,7 +51,7 @@ public class PatPatConfig {
 		try (FileReader reader = new FileReader(configPath)) {
 			instance = GSON.fromJson(reader, PatPatConfig.class);
 		} catch (Exception e) {
-			PatLogger.warn("Failed to read player list config!", e);
+			PatLogger.error("Failed to read PatPatConfig:", e);
 		}
 		RateLimitManager.reloadTask();
 	}
@@ -66,7 +66,7 @@ public class PatPatConfig {
 		try (FileWriter writer = new FileWriter(getConfigPath())) {
 			writer.write(json);
 		} catch (Exception e) {
-			PatLogger.warn("Failed to save config!", e);
+			PatLogger.error("Failed to save PatPatConfig:", e);
 		}
 	}
 
@@ -76,7 +76,7 @@ public class PatPatConfig {
 			assert (inputStream != null);
 			return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 		} catch (Exception e) {
-			PatLogger.error("Failed to open `%s` in jar".formatted(FILENAME), e);
+			PatLogger.error("Failed to load PatPatConfig from jar!");
 		}
 		return null;
 	}
@@ -84,14 +84,13 @@ public class PatPatConfig {
 	private static PatPatConfig create() {
 		String json = loadConfigFromJar();
 		if (json == null) {
-			PatLogger.warn("Failed to create config!");
 			return null;
 		}
 		PatPatConfig config = GSON.fromJson(json, PatPatConfig.class);
 		try (FileWriter writer = new FileWriter(getConfigPath())) {
 			writer.write(json);
 		} catch (Exception e) {
-			PatLogger.warn("Failed to create config!", e);
+			PatLogger.error("Failed to create PatPatConfig:", e);
 		}
 		return config;
 	}

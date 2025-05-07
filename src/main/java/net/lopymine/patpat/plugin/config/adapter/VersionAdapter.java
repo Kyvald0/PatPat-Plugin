@@ -2,7 +2,7 @@ package net.lopymine.patpat.plugin.config.adapter;
 
 import com.google.gson.*;
 
-import net.lopymine.patpat.plugin.Version;
+import net.lopymine.patpat.plugin.config.Version;
 
 import java.lang.reflect.Type;
 
