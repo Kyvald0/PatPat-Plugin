@@ -16,7 +16,8 @@ import net.lopymine.patpat.plugin.packet.PatPatPacketManager;
 @Getter
 public class PatPatPlugin extends JavaPlugin {
 
-	public static final String MOD_ID = "patpat-plugin";
+	public static final String PLUGIN_ID = "patpat-plugin";
+	public static final String MOD_ID = "patpat";
 
 	@Getter
 	private static PatPatPlugin instance;

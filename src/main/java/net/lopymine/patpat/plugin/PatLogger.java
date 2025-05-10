@@ -11,7 +11,7 @@ public class PatLogger {
 		throw new IllegalStateException("Logger class");
 	}
 
-	public static final Logger LOGGER = Logger.getLogger(PatPatPlugin.MOD_ID);
+	public static final Logger LOGGER = Logger.getLogger(PatPatPlugin.PLUGIN_ID);
 
 	public static void info(String message, Object... args) {
 		message = format(message, args);

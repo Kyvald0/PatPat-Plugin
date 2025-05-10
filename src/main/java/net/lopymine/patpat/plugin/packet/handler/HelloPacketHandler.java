@@ -2,66 +2,57 @@ package net.lopymine.patpat.plugin.packet.handler;
 
 import com.google.common.io.*;
 import lombok.experimental.ExtensionMethod;
-import org.bukkit.entity.Player;
 
-import net.lopymine.patpat.plugin.*;
+import net.lopymine.patpat.plugin.PatLogger;
+import net.lopymine.patpat.plugin.PatPatPlugin;
 import net.lopymine.patpat.plugin.config.Version;
+import net.lopymine.patpat.plugin.entity.PatPlayer;
 import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
-import net.lopymine.patpat.plugin.packet.PatPatPacketManager;
+import net.lopymine.patpat.plugin.util.StringUtils;
 
-import java.util.Map.Entry;
 
 @ExtensionMethod(ByteArrayDataExtension.class)
 public class HelloPacketHandler implements IPacketHandler {
 
+	public static final String HELLO_PATPAT_SERVER_C2S_PACKET = StringUtils.modId("hello_patpat_server_c2s_packet");
+	public static final String HELLO_PATPAT_PLAYER_S2C_PACKET = StringUtils.modId("hello_patpat_player_s2c_packet");
+
 	@Override
-	public void handle(Player sender, ByteArrayDataInput buf) {
-		PatLogger.info("Received hello packet from %s", sender.getName());
+	public void handle(PatPlayer sender, ByteArrayDataInput buf) {
+		PatLogger.debug("Received hello packet from %s", sender.getName());
+		readVersion(sender, buf);
+		sendServerVersion(sender);
+	}
 
-		// Reading sender version
+	private void readVersion(PatPlayer sender, ByteArrayDataInput buf) {
 		try {
-			int major = buf.readVarInt();
-			int minor = buf.readVarInt();
-			int patch = buf.readVarInt();
+			int major = buf.readUnsignedByte();
+			int minor = buf.readUnsignedByte();
+			int patch = buf.readUnsignedByte();
 			Version senderVersion = new Version(major, minor, patch);
-
-			PatPacketHandler handler = PatPacketHandler.HANDLERS.get(senderVersion);
-			if (handler == null) {
-				for (Entry<Version, PatPacketHandler> entry : PatPacketHandler.HANDLERS.entrySet()) {
-					Version packetVersion = entry.getKey();
-					if (!packetVersion.isLessThan(senderVersion)) {
-						continue;
-					}
-					PatPatPacketManager.PLAYER_PROTOCOLS.put(sender.getUniqueId(), packetVersion);
-					PatLogger.warn("Parsed unknown packet version: %s, using %s !", senderVersion.toString(), packetVersion.toString());
-					return;
-				}
-			}
-
-			PatPatPacketManager.PLAYER_PROTOCOLS.put(sender.getUniqueId(), senderVersion);
+			sender.setVersion(senderVersion);
+			PatLogger.debug("Player PatPat version: %s", senderVersion);
 		} catch (Exception e) {
 			PatLogger.error("Failed to read packet version from hello packet!", e);
-			PatPatPacketManager.PLAYER_PROTOCOLS.put(sender.getUniqueId(), Version.PACKET_V1_VERSION);
 		}
+	}
 
-		// Sending server version
+	private void sendServerVersion(PatPlayer patPlayer) {
+		Version serverVersion = Version.PLUGIN_VERSION;
 		ByteArrayDataOutput output = ByteStreams.newDataOutput();
-
-		Version pluginVersion = Version.PLUGIN_VERSION;
-		output.writeVarInt(pluginVersion.major());
-		output.writeVarInt(pluginVersion.minor());
-		output.writeVarInt(pluginVersion.patch());
-
-		sender.sendPluginMessage(PatPatPlugin.getInstance(), this.getOutgoingPacketId(), output.toByteArray());
+		output.writeByte(serverVersion.major());
+		output.writeByte(serverVersion.minor());
+		output.writeByte(serverVersion.patch());
+		patPlayer.sendPluginMessage(PatPatPlugin.getInstance(), this.getOutgoingPacketId(), output.toByteArray());
 	}
 
 	@Override
 	public String getIncomingPacketId() {
-		return PatPatPacketManager.HELLO_PATPAT_SERVER_C2S_PACKET;
+		return HELLO_PATPAT_SERVER_C2S_PACKET;
 	}
 
 	@Override
 	public String getOutgoingPacketId() {
-		return PatPatPacketManager.HELLO_PATPAT_PLAYER_S2C_PACKET;
+		return HELLO_PATPAT_PLAYER_S2C_PACKET;
 	}
 }

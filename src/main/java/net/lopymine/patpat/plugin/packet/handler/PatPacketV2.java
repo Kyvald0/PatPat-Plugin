@@ -1,0 +1,50 @@
+package net.lopymine.patpat.plugin.packet.handler;
+
+import com.google.common.io.*;
+import lombok.experimental.ExtensionMethod;
+import org.bukkit.entity.Entity;
+
+import net.lopymine.patpat.plugin.PatLogger;
+import net.lopymine.patpat.plugin.config.Version;
+import net.lopymine.patpat.plugin.entity.PatPlayer;
+import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
+import net.lopymine.patpat.plugin.util.StringUtils;
+
+import org.jetbrains.annotations.Nullable;
+
+@ExtensionMethod(ByteArrayDataExtension.class)
+public class PatPacketV2 implements IPatPacket {
+
+	private static final Version PACKET_VERSION = new Version(1, 2, 0);
+	private static final String PACKET_ID = StringUtils.modId("pat_entity_s2c_packet_v2");
+
+
+	@Override
+	public boolean canHandle(PatPlayer player) {
+		return player.getVersion().isGreaterOrEqualThan(PACKET_VERSION);
+	}
+
+	@Override
+	public @Nullable Entity getPattedEntity(PatPlayer sender, ByteArrayDataInput buf) {
+		try {
+			int entityId = buf.readVarInt();
+			for (Entity entity : sender.getWorld().getEntities()) { // TODO: Optimize this method (maybe cache entities)
+				if (entity.getEntityId() != entityId) {
+					continue;
+				}
+				return entity;
+			}
+		} catch (Exception e) {
+			PatLogger.warn("Failed to parse entityId from incoming packet from player %s[%s]! Ignoring packet.".formatted(sender.getName(), sender.getUniqueId()), e);
+		}
+		return null;
+	}
+
+	@Override
+	public PatPacket getPacket(Entity pattedEntity, Entity whoPattedEntity) {
+		ByteArrayDataOutput buf = ByteStreams.newDataOutput();
+		buf.writeVarInt(pattedEntity.getEntityId());
+		buf.writeVarInt(whoPattedEntity.getEntityId());
+		return new PatPacket(buf.toByteArray(), PACKET_ID);
+	}
+}

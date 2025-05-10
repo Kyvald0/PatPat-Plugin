@@ -1,84 +1,52 @@
 package net.lopymine.patpat.plugin.packet.handler;
 
 import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import lombok.experimental.ExtensionMethod;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.*;
 
-import net.lopymine.patpat.plugin.*;
+import net.lopymine.patpat.plugin.PatLogger;
+import net.lopymine.patpat.plugin.PatPatPlugin;
 import net.lopymine.patpat.plugin.command.ratelimit.RateLimitManager;
-import net.lopymine.patpat.plugin.config.*;
+import net.lopymine.patpat.plugin.config.PatPatConfig;
+import net.lopymine.patpat.plugin.config.PlayerListConfig;
 import net.lopymine.patpat.plugin.config.option.ListMode;
+import net.lopymine.patpat.plugin.entity.PatPlayer;
 import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
-import net.lopymine.patpat.plugin.packet.PatPatPacketManager;
-
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import net.lopymine.patpat.plugin.util.StringUtils;
 
 import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.*;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 
 @ExtensionMethod(ByteArrayDataExtension.class)
 public class PatPacketHandler implements IPacketHandler {
 
-	public static final Map<Version, PatPacketHandler> HANDLERS = new HashMap<>();
-	private static boolean initialized = false;
+	private static final String PATPAT_C2S_PACKET_ID_V2 = StringUtils.modId("pat_entity_c2s_packet_v2");
+	private static final String PATPAT_S2C_PACKET_ID_V2 = StringUtils.modId("pat_entity_s2c_packet_v2");
 
-	public static void registerHandler(PatPacketHandler handler) {
-		if (PatPacketHandler.initialized) {
-			throw new IllegalArgumentException("Cannot register handler after initialization the PatPacketHandler!");
-		}
-		PatPacketHandler.HANDLERS.put(handler.getPacketVersion(), handler);
-	}
+	private static final Set<IPatPacket> PAT_PACKET_HANDLERS = new HashSet<>();
 
-	public static String getOutgoingPacketIdByPlayerProtocol(UUID player) {
-		Version version = PatPatPacketManager.PLAYER_PROTOCOLS.get(player);
-		PatPacketHandler handler = PatPacketHandler.HANDLERS.get(version);
-		if (handler == null) {
-			return PatPatPacketManager.PATPAT_S2C_PACKET_ID;
-		}
-		return handler.getOutgoingPacketId();
-	}
+	private final double patVisibilityRadius = Bukkit.getServer().getViewDistance() * 16D;
 
-	public static byte[] getOutgoingPacketBytesByPlayerProtocol(UUID player, Entity pattedEntity, Entity whoPattedEntity, ByteArrayDataOutput output) {
-		Version version = PatPatPacketManager.PLAYER_PROTOCOLS.get(player);
-		PatPacketHandler handler = PatPacketHandler.HANDLERS.get(version);
-		if (handler == null) {
-			output.writeUuid(pattedEntity.getUniqueId());
-			output.writeUuid(whoPattedEntity.getUniqueId());
-			return output.toByteArray();
-		}
-		return handler.getOutgoingPacketBytes(pattedEntity, whoPattedEntity, output);
-	}
-
-	public static void init() {
-		Map<Version, PatPacketHandler> collect = PatPacketHandler.HANDLERS.entrySet()
-				.stream()
-				.sorted(Entry.comparingByKey())
-				.collect(Collectors.toMap(
-						Entry::getKey,
-						Entry::getValue,
-						(one, two) -> one,
-						LinkedHashMap::new)
-				);
-
-		PatPacketHandler.HANDLERS.clear();
-		PatPacketHandler.HANDLERS.putAll(collect);
-		PatPacketHandler.HANDLERS.keySet().forEach((k) -> PatLogger.debug(k.toString())); // TODO remove this line after check
-		PatPacketHandler.initialized = true;
+	public PatPacketHandler() {
+		PAT_PACKET_HANDLERS.clear();
+		PAT_PACKET_HANDLERS.add(new PatPacketV1());
+		PAT_PACKET_HANDLERS.add(new PatPacketV2());
 	}
 
 	@Override
-	public void handle(Player sender, ByteArrayDataInput buf) {
+	public void handle(PatPlayer sender, ByteArrayDataInput buf) {
 		PatPatPlugin plugin = PatPatPlugin.getInstance();
-		if (!this.canHandle(sender)) {
+		if (!this.canHandle(sender.getPlayer())) {
+			return;
+		}
+		IPatPacket senderPacketHandler = sender.getPatPacketHandler();
+		if (senderPacketHandler == null) {
+			PatLogger.debug("Not found packet handler for player with PatPat version: %s", sender.getVersion());
 			return;
 		}
 
-		Entity pattedEntity = this.getPattedEntity(plugin, sender, buf);
+		Entity pattedEntity = senderPacketHandler.getPattedEntity(sender, buf);
 		if (!(pattedEntity instanceof LivingEntity livingEntity)) {
 			return;
 		}
@@ -87,43 +55,55 @@ public class PatPacketHandler implements IPacketHandler {
 			return;
 		}
 
-		double patVisibilityRadius = plugin.getServer().getViewDistance() * 16;
-
-		List<Player> nearbyPlayers = new ArrayList<>(pattedEntity
+		List<PatPlayer> nearbyPlayers = new ArrayList<>(pattedEntity
 				.getNearbyEntities(patVisibilityRadius, patVisibilityRadius, patVisibilityRadius)
 				.stream()
-				.flatMap(entity -> {
+				.map(entity -> {
 					if (entity instanceof Player player) {
-						return Stream.of(player);
+						return player;
 					}
-					return Stream.empty();
-				}).toList());
+					return null;
+				})
+				.filter(Objects::nonNull)
+				.map(PatPlayer::of)
+				.toList()
+		);
 
 		if (pattedEntity instanceof Player player) {
-			nearbyPlayers.add(player);
+			nearbyPlayers.add(PatPlayer.of(player));
 		}
 
-		for (Player player : nearbyPlayers) {
-			UUID senderUuid = sender.getUniqueId();
+		UUID senderUuid = sender.getUniqueId();
+		Map<IPatPacket, PatPacket> packets = new HashMap<>();
+		nearbyPlayers.forEach(player -> {
 			UUID playerUuid = player.getUniqueId();
 			if (playerUuid.equals(senderUuid)) {
-				continue;
+				return;
 			}
-
-			byte[] byteArray = getOutgoingPacketBytesByPlayerProtocol(playerUuid, pattedEntity, sender, ByteStreams.newDataOutput());
-			String packetId = getOutgoingPacketIdByPlayerProtocol(playerUuid);
-			PatLogger.debug("Sending out pat packet to %s with id %s and data %s", player.getName(), packetId, Arrays.toString(byteArray));
-			player.sendPluginMessage(plugin, packetId, byteArray);
-		}
+			IPatPacket packetHandler = player.getPatPacketHandler();
+			if (packetHandler == null) {
+				return;
+			}
+			PatPacket packet = packets.computeIfAbsent(packetHandler, handler -> handler.getPacket(pattedEntity, sender.getPlayer()));
+			senderPacketHandler.getPacket(pattedEntity, sender.getPlayer());
+			PatLogger.debug("Sending out pat packet to %s with id %s and data %s", player.getName(), packet.channel(), Arrays.toString(packet.bytes()));
+			player.sendPluginMessage(plugin, packet.channel(), packet.bytes());
+		});
 	}
 
 	@Nullable
-	protected Entity getPattedEntity(PatPatPlugin plugin, Player player, ByteArrayDataInput buf) {
-		return plugin.getServer().getEntity(buf.readUuid());
+	public static IPatPacket getPacketHandler(PatPlayer player) {
+		for (IPatPacket packetHandler : PAT_PACKET_HANDLERS) {
+			if (packetHandler.canHandle(player)) {
+				return packetHandler;
+			}
+		}
+		return null;
 	}
 
 	private boolean canHandle(Player sender) {
-		if (!sender.hasPermission(PatPatConfig.getInstance().getRateLimit().getPermissionBypass()) && !RateLimitManager.canPat(sender.getUniqueId())) {
+		UUID senderUuid = sender.getUniqueId();
+		if (!sender.hasPermission(PatPatConfig.getInstance().getRateLimit().getPermissionBypass()) && !RateLimitManager.canPat(senderUuid)) {
 			return false;
 		}
 
@@ -132,28 +112,18 @@ public class PatPacketHandler implements IPacketHandler {
 
 		return switch (listMode) {
 			case DISABLED -> true;
-			case WHITELIST -> uuids.contains(sender.getUniqueId());
-			case BLACKLIST -> !uuids.contains(sender.getUniqueId());
+			case WHITELIST -> uuids.contains(senderUuid);
+			case BLACKLIST -> !uuids.contains(senderUuid);
 		};
 	}
 
 	@Override
 	public String getIncomingPacketId() {
-		return PatPatPacketManager.PATPAT_C2S_PACKET_ID;
+		return PATPAT_C2S_PACKET_ID_V2;
 	}
 
 	@Override
 	public String getOutgoingPacketId() {
-		return PatPatPacketManager.PATPAT_S2C_PACKET_ID;
-	}
-
-	public Version getPacketVersion() {
-		return Version.PACKET_V1_VERSION;
-	}
-
-	public byte[] getOutgoingPacketBytes(Entity pattedEntity, Entity whoPattedEntity, ByteArrayDataOutput output) {
-		output.writeUuid(pattedEntity.getUniqueId());
-		output.writeUuid(whoPattedEntity.getUniqueId());
-		return output.toByteArray();
+		return PATPAT_S2C_PACKET_ID_V2;
 	}
 }

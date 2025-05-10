@@ -18,7 +18,9 @@ import java.util.Objects;
 
 public class PatPatCommandManager {
 
-	private static final Component NO_PERMISSION_MESSAGE = Component.translatable("patpat.command.no_permission").color(NamedTextColor.RED);
+	private static final Component NO_PERMISSION_MESSAGE = Component
+			.translatable("patpat.command.no_permission")
+			.color(NamedTextColor.RED);
 
 	private PatPatCommandManager() {
 		throw new IllegalStateException("Manager class");
@@ -111,10 +113,6 @@ public class PatPatCommandManager {
 
 	public static void sendMessage(CommandSender sender, String message, Object... args) {
 		sender.sendMessage(getPluginMessage(message.formatted(args)));
-	}
-
-	public static String getWrongMessage(String valueWhichIsWrong) {
-		return "Was entered wrong %s, please follow this example of usage:".formatted(valueWhichIsWrong);
 	}
 
 	public static String getPluginMessage(String message) {

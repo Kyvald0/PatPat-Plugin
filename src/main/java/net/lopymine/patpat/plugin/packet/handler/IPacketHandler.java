@@ -1,11 +1,12 @@
 package net.lopymine.patpat.plugin.packet.handler;
 
 import com.google.common.io.ByteArrayDataInput;
-import org.bukkit.entity.Player;
+
+import net.lopymine.patpat.plugin.entity.PatPlayer;
 
 public interface IPacketHandler {
 
-	void handle(Player sender, ByteArrayDataInput buf);
+	void handle(PatPlayer sender, ByteArrayDataInput buf);
 
 	String getIncomingPacketId();
 

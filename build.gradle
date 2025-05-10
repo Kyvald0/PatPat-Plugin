@@ -67,8 +67,18 @@ java {
 	}
 }
 
+tasks.register('submodulesUpdate', Exec) {
+	description 'Updates (and inits) git submodules'
+	commandLine 'git', 'submodule', 'update', '--init', '--force', '--remote'
+}
+processResources.dependsOn submodulesUpdate
+
 jar {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	from("patpat-languages-files/lang") {
+		into "lang"
+	}
+
 	from {
 		configurations.extraLibs.collect {
 			it.isDirectory() ? it : zipTree(it)
