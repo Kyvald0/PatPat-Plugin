@@ -2,8 +2,6 @@ package net.lopymine.patpat.plugin;
 
 import lombok.Getter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
-import net.kyori.adventure.translation.GlobalTranslator;
-import net.kyori.adventure.translation.Translator;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.lopymine.patpat.plugin.command.PatPatCommandManager;
@@ -25,8 +23,6 @@ public class PatPatPlugin extends JavaPlugin {
 	@Getter
 	private static BukkitAudiences adventure;
 
-	private static Translator myTranslator;
-
 	@Override
 	@SuppressWarnings("java:S2696") // Plugins system
 	public void onEnable() {
@@ -43,8 +39,7 @@ public class PatPatPlugin extends JavaPlugin {
 		PatPatPacketManager.register();
 		PatPatCommandManager.register();
 		PatPatPlayerEventHandler.register();
-		myTranslator = new PatTranslator();
-		GlobalTranslator.translator().addSource(myTranslator);
+		PatTranslator.register();
 
 		PatLogger.info("Plugin started");
 	}
@@ -56,10 +51,6 @@ public class PatPatPlugin extends JavaPlugin {
 			adventure.close();
 			adventure = null;
 		}
-		if (myTranslator != null) {
-			GlobalTranslator.translator().removeSource(myTranslator);
-			myTranslator = null;
-		}
-
+		PatTranslator.unregister();
 	}
 }

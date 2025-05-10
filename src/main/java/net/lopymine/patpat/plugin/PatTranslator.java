@@ -2,10 +2,12 @@ package net.lopymine.patpat.plugin;
 
 import lombok.SneakyThrows;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
 
 import net.lopymine.patpat.plugin.util.ResourceUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -25,16 +27,41 @@ public class PatTranslator implements Translator {
 
 	private final Map<String, Map<String, String>> localizations = new HashMap<>();
 
-	@SneakyThrows
-	public PatTranslator() {
-		List<String> filenames = getBuiltinLangFiles();
-		PatLogger.debug("Found builtin lang files: " + filenames);
-		for (String filename : filenames) {
-			readLangResource(filename);
+	private static PatTranslator instance;
+
+	public static PatTranslator getInstance() {
+		if (instance == null) {
+			instance = new PatTranslator();
+		}
+		return instance;
+	}
+
+	public static void register() {
+		GlobalTranslator.translator().addSource(getInstance());
+	}
+
+	public static void unregister() {
+		if (instance != null) {
+			GlobalTranslator.translator().removeSource(instance);
+			instance = null;
 		}
 	}
 
-	private static List<String> getBuiltinLangFiles() throws IOException {
+	@SneakyThrows
+	public PatTranslator() {
+		registerInternalLangs();
+		registerExternalLangs();
+	}
+
+	@SneakyThrows
+	private void registerInternalLangs() {
+		List<String> filenames = getInternalLangFiles();
+		for (String filename : filenames) {
+			readLangResourceFromJar(filename);
+		}
+	}
+
+	private static List<String> getInternalLangFiles() throws IOException {
 		URL url = PatPatPlugin.getInstance().getClass().getClassLoader().getResource(LANG_FOLDER);
 		if (url == null) {
 			return Collections.emptyList();
@@ -44,7 +71,7 @@ public class PatTranslator implements Translator {
 		}
 		JarURLConnection connection = (JarURLConnection) url.openConnection();
 		try (JarFile jar = connection.getJarFile()) {
-			return jar.stream()
+			List<String> result = jar.stream()
 					.sequential()
 					.filter(entry -> !entry.isDirectory()
 							&& entry.getName().startsWith(LANG_FOLDER)
@@ -52,10 +79,13 @@ public class PatTranslator implements Translator {
 					.map(JarEntry::getName)
 					.map(str -> str.substring(LANG_FOLDER.length(), str.length() - LANG_FILETYPE.length()))
 					.toList();
+			PatLogger.debug("Found internal lang files: " + result);
+			return result;
 		}
 	}
 
-	private void readLangResource(String lang) {
+
+	private void readLangResourceFromJar(String lang) {
 		Map<String, String> langResource = ResourceUtils.loadLangFromJar("%s%s%s".formatted(LANG_FOLDER, lang, LANG_FILETYPE));
 		if (langResource == null) {
 			return;
@@ -64,6 +94,34 @@ public class PatTranslator implements Translator {
 		langResource.replaceAll((k, v) -> langResource.get(k).replace("'", "''"));
 
 		this.localizations.computeIfAbsent(lang, k -> new HashMap<>()).putAll(langResource);
+	}
+
+	private void registerExternalLangs() {
+		File langFolder = new File(PatPatPlugin.getInstance().getDataFolder(), "lang");
+		if (!langFolder.exists() && !langFolder.isDirectory()) {
+			return;
+		}
+		File[] jsonFiles = langFolder.listFiles((dir, name) ->
+				name.toLowerCase().endsWith(LANG_FILETYPE) && new File(dir, name).isFile());
+		if (jsonFiles == null) {
+			return;
+		}
+		PatLogger.debug("Found external lang files: " + Arrays.stream(jsonFiles).map(File::getName).toList());
+
+		for (File jsonFile : jsonFiles) {
+			String name = jsonFile.getName();
+			String lang = name.substring(0, name.length() - LANG_FILETYPE.length());
+			Map<String, String> langResource = ResourceUtils.loadLang(jsonFile);
+			if (langResource == null) {
+				return;
+			}
+			PatLogger.info(lang);
+			// Fix single quotes
+			langResource.replaceAll((k, v) -> langResource.get(k).replace("'", "''"));
+
+			this.localizations.computeIfAbsent(lang, k -> new HashMap<>()).putAll(langResource);
+		}
+
 	}
 
 	@Override

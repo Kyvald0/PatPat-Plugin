@@ -20,7 +20,7 @@ import java.util.Set;
  * @deprecated This class is no longer supporting
  * <p>use {@link PatPacketHandler} instead.</p>
  */
-@Deprecated(since = "1.1.0")
+@Deprecated(since = "1.2.0")
 @ExtensionMethod(PlayerExtension.class)
 public class PatPacketOldHandler extends PatPacketHandler {
 

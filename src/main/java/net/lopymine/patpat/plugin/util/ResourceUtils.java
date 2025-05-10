@@ -18,6 +18,8 @@ public class ResourceUtils {
 
 	private static final Type MAP_TYPE = new TypeToken<Map<String, String>>() {}.getType();
 
+	private static final String FAILED_OPEN_JAR_FILE = "Failed to open `%s` in the jar file";
+
 	private static final Gson GSON = new GsonBuilder()
 			.setPrettyPrinting()
 			.create();
@@ -31,7 +33,7 @@ public class ResourceUtils {
 				PatLogger.error("Failed to find `%s` in the jar file".formatted(filename));
 			}
 		} catch (Exception e) {
-			PatLogger.error("Failed to open `%s` in the jar file".formatted(filename), e);
+			PatLogger.error(FAILED_OPEN_JAR_FILE.formatted(filename), e);
 		}
 		return null;
 	}
@@ -47,7 +49,19 @@ public class ResourceUtils {
 		} catch (JsonSyntaxException e) {
 			PatLogger.error("Failed to read json from `%s` in the jar file".formatted(filename), e);
 		} catch (IOException e) {
-			PatLogger.error("Failed to open `%s` in the jar file".formatted(filename), e);
+			PatLogger.error(FAILED_OPEN_JAR_FILE.formatted(filename), e);
+		}
+		return null;
+	}
+
+	@Nullable
+	public static Map<String, String> loadLang(File file) {
+		try (InputStream inputStream = new FileInputStream(file)) {
+			return GSON.fromJson(new InputStreamReader(inputStream), MAP_TYPE);
+		} catch (JsonSyntaxException e) {
+			PatLogger.error("Failed to read json from `%s` in the jar file".formatted(file.getName()), e);
+		} catch (IOException e) {
+			PatLogger.error(FAILED_OPEN_JAR_FILE.formatted(file.getName()), e);
 		}
 		return null;
 	}

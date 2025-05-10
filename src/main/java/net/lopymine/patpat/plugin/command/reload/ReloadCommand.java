@@ -4,6 +4,7 @@ import lombok.experimental.ExtensionMethod;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 
+import net.lopymine.patpat.plugin.PatTranslator;
 import net.lopymine.patpat.plugin.command.api.ICommand;
 import net.lopymine.patpat.plugin.config.PatPatConfig;
 import net.lopymine.patpat.plugin.config.PlayerListConfig;
@@ -25,6 +26,8 @@ public class ReloadCommand implements ICommand {
 	public void execute(CommandSender sender, String[] strings) {
 		PatPatConfig.reload();
 		PlayerListConfig.reload();
+		PatTranslator.unregister();
+		PatTranslator.register();
 		sender.sendTranslatable("patpat.command.reload");
 	}
 
