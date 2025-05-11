@@ -32,9 +32,9 @@ public class PatPacketHandler implements IPacketHandler {
 	public PatPacketHandler() {
 		// MUST be in order from newer to older
 		// Otherwise it will be handled in the wrong way, for example,
- 		// 1) 1.2.0(Client Version) >= 1.0.0(PatPacketV1)?
+		// 1) 1.2.0(Client Version) >= 1.0.0(PatPacketV1)?
 		// -> Use 1.0.0 packets (wrong)
- 		// 2) 1.2.0(Client Version) >= 1.2.0(PatPacketV2)?
+		// 2) 1.2.0(Client Version) >= 1.2.0(PatPacketV2)?
 		// -> Use 1.2.0 packets, you will say, but we are already using 1.0.0 packets because of the wrong order
 
 		PAT_PACKET_HANDLERS.clear();
@@ -82,7 +82,7 @@ public class PatPacketHandler implements IPacketHandler {
 		}
 
 		UUID senderUuid = sender.getUniqueId();
-		Map<IPatPacket, PatPacket> packets = new HashMap<>();
+		Map<String, PatPacket> packets = new HashMap<>();
 		nearbyPlayers.forEach(player -> {
 			UUID playerUuid = player.getUniqueId();
 			if (playerUuid.equals(senderUuid)) {
@@ -92,7 +92,10 @@ public class PatPacketHandler implements IPacketHandler {
 			if (packetHandler == null) {
 				return;
 			}
-			PatPacket packet = packets.computeIfAbsent(packetHandler, handler -> handler.getPacket(pattedEntity, sender.getPlayer()));
+			PatPacket packet = packets.computeIfAbsent(
+					packetHandler.getPacketHandlerId(),
+					s -> packetHandler.getPacket(pattedEntity, sender.getPlayer())
+			);
 			PatLogger.debug("Sending out pat packet to %s with id %s and data %s", player.getName(), packet.channel(), Arrays.toString(packet.bytes()));
 			player.sendPluginMessage(plugin, packet.channel(), packet.bytes());
 		});

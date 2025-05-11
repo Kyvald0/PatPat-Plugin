@@ -46,4 +46,9 @@ public class PatPacketV2 implements IPatPacket {
 		buf.writeVarInt(whoPattedEntity.getEntityId());
 		return new PatPacket(buf.toByteArray(), PACKET_ID);
 	}
+
+	@Override
+	public String getPacketHandlerId() {
+		return "PatPacketV2";
+	}
 }

@@ -39,7 +39,7 @@ public class ListAddCommand implements ICommand {
 	}
 
 	@Override
-	public void execute(CommandSender sender, String[] strings) { // TODO: rewrite method for servers, with `online-mode: false`, problem with uuid
+	public void execute(CommandSender sender, String[] strings) {
 		if (strings.length == 0) {
 			sender.sendPatPatMessage(this.getExampleOfUsage());
 		}

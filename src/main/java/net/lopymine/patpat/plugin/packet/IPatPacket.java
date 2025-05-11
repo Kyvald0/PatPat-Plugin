@@ -16,4 +16,6 @@ public interface IPatPacket {
 
 	PatPacket getPacket(Entity pattedEntity, Entity whoPattedEntity);
 
+	String getPacketHandlerId();
+
 }

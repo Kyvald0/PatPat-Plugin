@@ -41,4 +41,10 @@ public class PatPacketV1 implements IPatPacket {
 		buf.writeUuid(whoPattedEntity.getUniqueId());
 		return new PatPacket(buf.toByteArray(), PACKET_ID);
 	}
+
+	@Override
+	public String getPacketHandlerId() {
+		return "PatPacketV1";
+	}
+
 }
