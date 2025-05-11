@@ -13,6 +13,7 @@ import net.lopymine.patpat.plugin.config.PlayerListConfig;
 import net.lopymine.patpat.plugin.config.option.ListMode;
 import net.lopymine.patpat.plugin.entity.PatPlayer;
 import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
+import net.lopymine.patpat.plugin.packet.*;
 import net.lopymine.patpat.plugin.util.StringUtils;
 
 import java.util.*;
@@ -24,14 +25,21 @@ public class PatPacketHandler implements IPacketHandler {
 	private static final String PATPAT_C2S_PACKET_ID_V2 = StringUtils.modId("pat_entity_c2s_packet_v2");
 	private static final String PATPAT_S2C_PACKET_ID_V2 = StringUtils.modId("pat_entity_s2c_packet_v2");
 
-	private static final Set<IPatPacket> PAT_PACKET_HANDLERS = new HashSet<>();
+	private static final Set<IPatPacket> PAT_PACKET_HANDLERS = new LinkedHashSet<>();
 
 	private final double patVisibilityRadius = Bukkit.getServer().getViewDistance() * 16D;
 
 	public PatPacketHandler() {
+		// MUST be in order from newer to older
+		// Otherwise it will be handled in the wrong way, for example,
+ 		// 1) 1.2.0(Client Version) >= 1.0.0(PatPacketV1)?
+		// -> Use 1.0.0 packets (wrong)
+ 		// 2) 1.2.0(Client Version) >= 1.2.0(PatPacketV2)?
+		// -> Use 1.2.0 packets, you will say, but we are already using 1.0.0 packets because of the wrong order
+
 		PAT_PACKET_HANDLERS.clear();
-		PAT_PACKET_HANDLERS.add(new PatPacketV1());
 		PAT_PACKET_HANDLERS.add(new PatPacketV2());
+		PAT_PACKET_HANDLERS.add(new PatPacketV1());
 	}
 
 	@Override
@@ -85,7 +93,6 @@ public class PatPacketHandler implements IPacketHandler {
 				return;
 			}
 			PatPacket packet = packets.computeIfAbsent(packetHandler, handler -> handler.getPacket(pattedEntity, sender.getPlayer()));
-			senderPacketHandler.getPacket(pattedEntity, sender.getPlayer());
 			PatLogger.debug("Sending out pat packet to %s with id %s and data %s", player.getName(), packet.channel(), Arrays.toString(packet.bytes()));
 			player.sendPluginMessage(plugin, packet.channel(), packet.bytes());
 		});

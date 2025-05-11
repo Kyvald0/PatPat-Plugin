@@ -1,8 +1,10 @@
-package net.lopymine.patpat.plugin.packet;
+package net.lopymine.patpat.plugin.packet.manager;
 
 import org.bukkit.plugin.messaging.Messenger;
 
 import net.lopymine.patpat.plugin.PatPatPlugin;
+import net.lopymine.patpat.plugin.packet.handler.PatPacketHandler;
+import net.lopymine.patpat.plugin.packet.listener.PatPatPacketListener;
 import net.lopymine.patpat.plugin.packet.handler.*;
 
 public class PatPatPacketManager {
@@ -11,6 +13,7 @@ public class PatPatPacketManager {
 		throw new IllegalStateException("Manager class");
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void register() {
 		// Create Main Listener for PatPat Packets
 		PatPatPacketListener listener = new PatPatPacketListener();

@@ -9,7 +9,7 @@ import net.lopymine.patpat.plugin.config.PatPatConfig;
 import net.lopymine.patpat.plugin.config.PlayerListConfig;
 import net.lopymine.patpat.plugin.config.migrate.MigrateManager;
 import net.lopymine.patpat.plugin.event.PatPatPlayerEventHandler;
-import net.lopymine.patpat.plugin.packet.PatPatPacketManager;
+import net.lopymine.patpat.plugin.packet.manager.PatPatPacketManager;
 
 @Getter
 public class PatPatPlugin extends JavaPlugin {

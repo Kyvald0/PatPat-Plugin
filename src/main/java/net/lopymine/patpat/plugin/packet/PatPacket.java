@@ -1,4 +1,4 @@
-package net.lopymine.patpat.plugin.packet.handler;
+package net.lopymine.patpat.plugin.packet;
 
 import java.util.Arrays;
 import java.util.Objects;

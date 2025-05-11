@@ -10,25 +10,25 @@ import org.bukkit.plugin.Plugin;
 
 import net.lopymine.patpat.plugin.config.Version;
 import net.lopymine.patpat.plugin.extension.PlayerExtension;
-import net.lopymine.patpat.plugin.packet.handler.IPatPacket;
+import net.lopymine.patpat.plugin.packet.*;
 import net.lopymine.patpat.plugin.packet.handler.PatPacketHandler;
 
 import java.util.*;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 @Getter
 @ExtensionMethod(PlayerExtension.class)
 public class PatPlayer {
 
-	private static final Version DEFAULT_VERSION = new Version(1, 0, 0);
 	private static final Map<Player, PatPlayer> PAT_PLAYERS = new HashMap<>();
 
 	private final Player player;
-	private Version version = DEFAULT_VERSION;
+	private Version version = PatPacketV1.PAT_PACKET_V1_VERSION;
+	@Nullable
 	private IPatPacket patPacketHandler;
 
 	public PatPlayer(Player player) {
-		this(player, DEFAULT_VERSION);
+		this(player, PatPacketV1.PAT_PACKET_V1_VERSION);
 	}
 
 	public PatPlayer(Player player, Version version) {
@@ -43,7 +43,7 @@ public class PatPlayer {
 
 	@CanIgnoreReturnValue
 	public static PatPlayer register(@NotNull Player player) {
-		PatPlayer patPlayer = new PatPlayer(player, DEFAULT_VERSION);
+		PatPlayer patPlayer = new PatPlayer(player, PatPacketV1.PAT_PACKET_V1_VERSION);
 		PAT_PLAYERS.put(player, patPlayer);
 		return patPlayer;
 	}

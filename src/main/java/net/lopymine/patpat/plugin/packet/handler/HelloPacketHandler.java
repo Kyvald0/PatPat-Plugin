@@ -8,6 +8,7 @@ import net.lopymine.patpat.plugin.PatPatPlugin;
 import net.lopymine.patpat.plugin.config.Version;
 import net.lopymine.patpat.plugin.entity.PatPlayer;
 import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
+import net.lopymine.patpat.plugin.packet.PatPacketV2;
 import net.lopymine.patpat.plugin.util.StringUtils;
 
 
@@ -20,30 +21,41 @@ public class HelloPacketHandler implements IPacketHandler {
 	@Override
 	public void handle(PatPlayer sender, ByteArrayDataInput buf) {
 		PatLogger.debug("Received hello packet from %s", sender.getName());
-		readVersion(sender, buf);
-		sendServerVersion(sender);
+		this.readVersion(sender, buf);
+		this.sendServerVersion(sender);
 	}
 
 	private void readVersion(PatPlayer sender, ByteArrayDataInput buf) {
+		Version version = Version.INVALID;
+
 		try {
 			int major = buf.readUnsignedByte();
 			int minor = buf.readUnsignedByte();
 			int patch = buf.readUnsignedByte();
-			Version senderVersion = new Version(major, minor, patch);
-			sender.setVersion(senderVersion);
-			PatLogger.debug("Player PatPat version: %s", senderVersion);
+			version = new Version(major, minor, patch);
 		} catch (Exception e) {
-			PatLogger.error("Failed to read packet version from hello packet!", e);
+			PatLogger.error("Failed to parse packet version from hello packet!", e);
 		}
+
+		if (version.isInvalid()) {
+			version = PatPacketV2.PAT_PACKET_V2_VERSION; // Since v2 packet version we started sending hello packets
+		}
+
+		sender.setVersion(version);
+		PatLogger.debug("Player PatPat version: %s", sender.getVersion());
 	}
 
 	private void sendServerVersion(PatPlayer patPlayer) {
-		Version serverVersion = Version.PLUGIN_VERSION;
-		ByteArrayDataOutput output = ByteStreams.newDataOutput();
-		output.writeByte(serverVersion.major());
-		output.writeByte(serverVersion.minor());
-		output.writeByte(serverVersion.patch());
-		patPlayer.sendPluginMessage(PatPatPlugin.getInstance(), this.getOutgoingPacketId(), output.toByteArray());
+		try {
+			Version serverVersion = Version.CURRENT_PLUGIN_VERSION;
+			ByteArrayDataOutput output = ByteStreams.newDataOutput();
+			output.writeByte(serverVersion.major());
+			output.writeByte(serverVersion.minor());
+			output.writeByte(serverVersion.patch());
+			patPlayer.sendPluginMessage(PatPatPlugin.getInstance(), this.getOutgoingPacketId(), output.toByteArray());
+		} catch (Exception e) {
+			PatLogger.error("Failed to send server hello packet version to %s:".formatted(patPlayer.getPlayer().getName()), e);
+		}
 	}
 
 	@Override

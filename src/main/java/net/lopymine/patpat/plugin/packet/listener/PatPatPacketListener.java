@@ -1,4 +1,4 @@
-package net.lopymine.patpat.plugin.packet;
+package net.lopymine.patpat.plugin.packet.listener;
 
 import com.google.common.io.ByteStreams;
 import org.bukkit.entity.Player;

@@ -1,4 +1,4 @@
-package net.lopymine.patpat.plugin.packet.handler;
+package net.lopymine.patpat.plugin.packet;
 
 import com.google.common.io.*;
 import lombok.experimental.ExtensionMethod;
@@ -15,13 +15,12 @@ import org.jetbrains.annotations.Nullable;
 @ExtensionMethod(ByteArrayDataExtension.class)
 public class PatPacketV2 implements IPatPacket {
 
-	private static final Version PACKET_VERSION = new Version(1, 2, 0);
+	public static final Version PAT_PACKET_V2_VERSION = new Version(1, 2, 0);
 	private static final String PACKET_ID = StringUtils.modId("pat_entity_s2c_packet_v2");
-
 
 	@Override
 	public boolean canHandle(PatPlayer player) {
-		return player.getVersion().isGreaterOrEqualThan(PACKET_VERSION);
+		return player.getVersion().isGreaterOrEqualThan(PAT_PACKET_V2_VERSION);
 	}
 
 	@Override

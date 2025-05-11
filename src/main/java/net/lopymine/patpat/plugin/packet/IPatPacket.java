@@ -1,4 +1,4 @@
-package net.lopymine.patpat.plugin.packet.handler;
+package net.lopymine.patpat.plugin.packet;
 
 import com.google.common.io.ByteArrayDataInput;
 import org.bukkit.entity.Entity;
