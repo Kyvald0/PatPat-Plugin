@@ -9,7 +9,6 @@ import net.lopymine.patpat.plugin.config.adapter.VersionAdapter;
 @Getter
 public class InfoConfig {
 
-
 	@SerializedName("_comment")
 	private String comment;
 	@SerializedName("_doc")
@@ -26,6 +25,5 @@ public class InfoConfig {
 		this.doc     = "Documentation: https://github.com/LopyMine/PatPat-Plugin/blob/main/doc/en/config.md";
 		this.version = Version.SERVER_CONFIG_VERSION;
 	}
-
 
 }

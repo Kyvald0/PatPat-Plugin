@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class PatTranslator implements Translator {
 
-	private static final String DEFAULT_LANG = "en-US";
+	private static final String DEFAULT_LANG = "en_US";
 
 	private static final String LANG_FOLDER = "lang/";
 	private static final String LANG_FILETYPE = ".json";
@@ -135,7 +135,7 @@ public class PatTranslator implements Translator {
 		if (!key.startsWith("patpat")) {
 			return null;
 		}
-		String lang = locale.toLanguageTag();
+		String lang = locale.toString();
 		Map<String, String> localization = this.localizations.getOrDefault(lang, null);
 		if (localization == null) {
 			String message = this.localizations.get(DEFAULT_LANG).getOrDefault(key, null);
