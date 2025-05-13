@@ -2,6 +2,7 @@ package net.lopymine.patpat.plugin.packet.handler;
 
 import com.google.common.io.*;
 import lombok.experimental.ExtensionMethod;
+import org.bukkit.entity.Player;
 
 import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.PatPatPlugin;
@@ -22,7 +23,6 @@ public class HelloPacketHandler implements IPacketHandler {
 	public void handle(PatPlayer sender, ByteArrayDataInput buf) {
 		PatLogger.debug("Received hello packet from %s", sender.getName());
 		this.readVersion(sender, buf);
-		this.sendServerVersion(sender);
 	}
 
 	private void readVersion(PatPlayer sender, ByteArrayDataInput buf) {
@@ -45,16 +45,20 @@ public class HelloPacketHandler implements IPacketHandler {
 		PatLogger.debug("Player PatPat version: %s", sender.getVersion());
 	}
 
-	private void sendServerVersion(PatPlayer patPlayer) {
+	public static void sendHelloPacket(PatPlayer patPlayer) {
+		sendHelloPacket(patPlayer.getPlayer());
+	}
+
+	public static void sendHelloPacket(Player player) {
 		try {
 			Version serverVersion = Version.CURRENT_PLUGIN_VERSION;
 			ByteArrayDataOutput output = ByteStreams.newDataOutput();
 			output.writeByte(serverVersion.major());
 			output.writeByte(serverVersion.minor());
 			output.writeByte(serverVersion.patch());
-			patPlayer.sendPluginMessage(PatPatPlugin.getInstance(), this.getOutgoingPacketId(), output.toByteArray());
+			player.sendPluginMessage(PatPatPlugin.getInstance(), HELLO_PATPAT_PLAYER_S2C_PACKET, output.toByteArray());
 		} catch (Exception e) {
-			PatLogger.error("Failed to send server hello packet version to %s:".formatted(patPlayer.getPlayer().getName()), e);
+			PatLogger.error("Failed to send server hello packet version to %s:".formatted(player.getName()), e);
 		}
 	}
 

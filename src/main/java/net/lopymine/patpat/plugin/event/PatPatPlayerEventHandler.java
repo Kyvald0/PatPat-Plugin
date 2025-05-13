@@ -4,13 +4,13 @@ import lombok.experimental.ExtensionMethod;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 
 import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.PatPatPlugin;
 import net.lopymine.patpat.plugin.entity.PatPlayer;
 import net.lopymine.patpat.plugin.extension.PlayerExtension;
+import net.lopymine.patpat.plugin.packet.handler.HelloPacketHandler;
 
 @ExtensionMethod(PlayerExtension.class)
 public class PatPatPlayerEventHandler implements Listener {
@@ -21,10 +21,19 @@ public class PatPatPlayerEventHandler implements Listener {
 	}
 
 	@EventHandler
+	public void channelRegister(PlayerRegisterChannelEvent event) {
+		String channel = event.getChannel();
+		PatLogger.debug("Channel registered: %s", channel);
+		if(HelloPacketHandler.HELLO_PATPAT_PLAYER_S2C_PACKET.equals(channel)){
+			PatLogger.debug("Channel %s is registered, sending hello packet", channel);
+			HelloPacketHandler.sendHelloPacket(event.getPlayer());
+		}
+	}
+
+	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
-		Player player = event.getPlayer();
-		PatPlayer.register(player);
-		PatLogger.debug("Player %s joined", player.getName());
+		PatPlayer patPlayer = PatPlayer.register(event.getPlayer());
+		PatLogger.debug("Player %s joined", patPlayer.getName());
 	}
 
 	@EventHandler
