@@ -29,7 +29,7 @@ public class IntervalCommand implements ICommand {
 		PatPatConfig config = PatPatConfig.getInstance();
 		RateLimitConfig rateLimitConfig = config.getRateLimit();
 		if (strings.length == 0) {
-			sender.sendTranslatable("patpat.command.ratelimit.set.interval",
+			sender.sendTranslatable("patpat.command.ratelimit.set.interval.info",
 					Component.text(rateLimitConfig.getTokenInterval().toString())
 							.color(NamedTextColor.GOLD));
 			return;
@@ -41,7 +41,7 @@ public class IntervalCommand implements ICommand {
 		try {
 			Time value = Time.of(strings[0]);
 			if (value.getValue() <= 0) {
-				sender.sendTranslatable("patpat.command.error.time.less_than",
+				sender.sendTranslatable("patpat.command.error.time_less_than",
 						Component.text(value.toString()).color(NamedTextColor.GOLD),
 						Component.text("1sec").color(NamedTextColor.GOLD)
 				);
@@ -50,10 +50,10 @@ public class IntervalCommand implements ICommand {
 			rateLimitConfig.setTokenInterval(value);
 			config.save();
 			RateLimitManager.reloadTask();
-			sender.sendTranslatable("patpat.command.ratelimit.set.interval.updated",
+			sender.sendTranslatable("patpat.command.ratelimit.set.interval",
 					Component.text(value.toString()).color(NamedTextColor.GOLD));
 		} catch (IllegalArgumentException ignored) {
-			sender.sendTranslatable("patpat.command.error.time.not_time",
+			sender.sendTranslatable("patpat.command.error.time_not_time",
 					Component.text(strings[0]).color(NamedTextColor.GOLD)
 			);
 		}

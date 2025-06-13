@@ -55,9 +55,9 @@ public class ListSetCommand implements ICommand {
 			TextComponent listComponent = Component
 					.text(listMode.name())
 					.color(NamedTextColor.GOLD);
-			sender.sendTranslatable("patpat.command.list.set", listComponent);
+			sender.sendTranslatable("patpat.command.list.set.success", listComponent);
 		} catch (IllegalArgumentException e) {
-			sender.sendTranslatable("patpat.command.list.set.error", Component.text(value).color(NamedTextColor.GOLD));
+			sender.sendTranslatable("patpat.command.list.set.failed", Component.text(value).color(NamedTextColor.GOLD));
 		}
 	}
 

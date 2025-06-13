@@ -22,9 +22,6 @@ import java.util.List;
 @ExtensionMethod(CommandSenderExtension.class)
 public class RateLimitInfoCommand implements ICommand {
 
-	private static final Component DISABLED = Component.translatable("patpat.command.ratelimit.disabled").color(NamedTextColor.RED);
-	private static final Component ENABLED = Component.translatable("patpat.command.ratelimit.enabled").color(NamedTextColor.GREEN);
-
 	@Override
 	public List<String> getSuggestions(CommandSender sender, String[] strings) {
 		if (strings.length == 1) {
@@ -43,7 +40,7 @@ public class RateLimitInfoCommand implements ICommand {
 			Player player = Bukkit.getPlayer(strings[0]);
 			if (player == null) {
 				sender.sendTranslatable(
-						"patpat.command.error.player.not_exist",
+						"patpat.command.error.player_not_exist",
 						Component.text(strings[0]).color(NamedTextColor.GOLD)
 				);
 				return;
@@ -64,7 +61,7 @@ public class RateLimitInfoCommand implements ICommand {
 			return;
 		}
 
-		Component statusComponent = config.isEnabled() ? ENABLED : DISABLED;
+		Component statusComponent = Component.translatable("formatter.enabled_or_disabled." + config.isEnabled());
 		Component limitComponent = Component.text(config.getTokenLimit()).color(NamedTextColor.GOLD);
 		Component incrementComponent = Component.text(config.getTokenIncrement()).color(NamedTextColor.GOLD);
 		Component intervalComponent = Component.text(config.getTokenInterval().toString()).color(NamedTextColor.GOLD);
@@ -74,9 +71,9 @@ public class RateLimitInfoCommand implements ICommand {
 				.hoverEvent(HoverEvent.showText(Component.translatable("patpat.command.ratelimit.info.permission_bypass.copy")));
 
 		sender.sendTranslatable("patpat.command.ratelimit.info.status", statusComponent);
-		sender.sendTranslatable("patpat.command.ratelimit.set.limit", limitComponent);
-		sender.sendTranslatable("patpat.command.ratelimit.set.increment", incrementComponent);
-		sender.sendTranslatable("patpat.command.ratelimit.set.interval", intervalComponent);
+		sender.sendTranslatable("patpat.command.ratelimit.set.limit.info", limitComponent);
+		sender.sendTranslatable("patpat.command.ratelimit.set.increment.info", incrementComponent);
+		sender.sendTranslatable("patpat.command.ratelimit.set.interval.info", intervalComponent);
 		sender.sendTranslatable("patpat.command.ratelimit.info.permission_bypass", permissionComponent);
 	}
 

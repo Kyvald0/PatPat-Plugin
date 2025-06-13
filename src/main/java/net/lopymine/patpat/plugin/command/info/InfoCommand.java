@@ -38,7 +38,7 @@ public class InfoCommand implements ICommand {
 		this.platformComponent         = Component.translatable("patpat.command.info.platform")
 				.args(Component.text(PLATFORM).color(NamedTextColor.GOLD))
 				.mergeStyle(style);
-		this.pluginVersionComponent    = Component.translatable("patpat.command.info.plugin_version")
+		this.pluginVersionComponent    = Component.translatable("patpat.command.info.version")
 				.args(Component.text(pluginVersion).color(NamedTextColor.GOLD))
 				.mergeStyle(style);
 		this.minecraftVersionComponent = Component.translatable("patpat.command.info.minecraft_version")

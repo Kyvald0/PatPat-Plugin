@@ -15,42 +15,20 @@ import java.util.Collections;
 import java.util.List;
 
 @ExtensionMethod(CommandSenderExtension.class)
-public class RateLimitDisableCommand implements ICommand {
-
-	private static final Component DISABLED = Component.translatable("patpat.command.ratelimit.disabled").color(NamedTextColor.RED);
+public class RateLimitDisableCommand extends RateLimitToggleCommand {
 
 	@Override
-	public List<String> getSuggestions(CommandSender sender, String[] strings) {
-		return Collections.emptyList();
+	protected String getTranslationKey() {
+		return "disable";
 	}
 
 	@Override
-	public void execute(CommandSender sender, String[] strings) {
-		PatPatConfig config = PatPatConfig.getInstance();
-		RateLimitConfig rateLimitConfig = config.getRateLimit();
-		if (!rateLimitConfig.isEnabled()) {
-			sender.sendTranslatable("patpat.command.ratelimit.toggle.already", DISABLED);
-			return;
-		}
-		rateLimitConfig.setEnabled(false);
-		config.save();
-		RateLimitManager.reloadTask();
-		sender.sendTranslatable("patpat.command.ratelimit.toggle", DISABLED);
+	protected boolean getValue() {
+		return false;
 	}
 
 	@Override
-	public String getPermissionKey() {
-		return StringUtils.permission("ratelimit.toggle");
-	}
-
-	@Override
-	public String getExampleOfUsage() {
-		return "/patpat ratelimit disable";
-	}
-
-
-	@Override
-	public Component getDescription() {
-		return Component.translatable("patpat.command.ratelimit.disable.description");
+	protected NamedTextColor getColor() {
+		return NamedTextColor.RED;
 	}
 }

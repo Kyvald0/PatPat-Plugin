@@ -85,7 +85,7 @@ public class ListRemoveCommand implements ICommand {
 				.text(nickname)
 				.color(NamedTextColor.GOLD);
 		if (config.remove(nickname)) {
-			sender.sendTranslatable("patpat.command.list.remove", nicknameComponent);
+			sender.sendTranslatable("patpat.command.list.remove.success", nicknameComponent);
 			config.save();
 		} else {
 			sender.sendTranslatable("patpat.command.list.remove.already", nicknameComponent);

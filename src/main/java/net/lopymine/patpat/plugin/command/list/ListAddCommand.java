@@ -72,7 +72,7 @@ public class ListAddCommand implements ICommand {
 		}
 
 		if (offlinePlayer == null) {
-			sender.sendPatPatMessage("Failed to find player with \"§6%s§r\" uuid or nickname", nickname);
+			sender.sendTranslatable("patpat.command.error.player_not_exist", Component.text(nickname).color(NamedTextColor.GOLD));
 			return;
 		}
 		addPlayer(sender, offlinePlayer.getUniqueId(), nickname);
@@ -85,8 +85,9 @@ public class ListAddCommand implements ICommand {
 				.color(NamedTextColor.GOLD)
 				.hoverEvent(HoverEvent.showText(Component.text(uuid.toString())))
 				.clickEvent(ClickEvent.clickEvent(Action.COPY_TO_CLIPBOARD, uuid.toString()));
+
 		if (config.add(uuid, nickname)) {
-			sender.sendTranslatable("patpat.command.list.add", nicknameComponent);
+			sender.sendTranslatable("patpat.command.list.add.success", nicknameComponent);
 			config.save();
 		} else {
 			sender.sendTranslatable("patpat.command.list.add.already", nicknameComponent);

@@ -27,7 +27,7 @@ public class LimitCommand implements ICommand {
 		PatPatConfig config = PatPatConfig.getInstance();
 		RateLimitConfig rateLimitConfig = config.getRateLimit();
 		if (strings.length == 0) {
-			sender.sendTranslatable("patpat.command.ratelimit.set.limit",
+			sender.sendTranslatable("patpat.command.ratelimit.set.limit.info",
 					Component.text(rateLimitConfig.getTokenLimit())
 							.color(NamedTextColor.GOLD));
 			return;
@@ -40,7 +40,7 @@ public class LimitCommand implements ICommand {
 			int value = Integer.parseInt(strings[0]);
 			if (value <= 0) {
 				sender.sendTranslatable(
-						"patpat.command.error.number.less_than",
+						"patpat.command.error.number_less_than",
 						Component.text(value).color(NamedTextColor.GOLD),
 						Component.text(1).color(NamedTextColor.GOLD)
 				);
@@ -48,11 +48,11 @@ public class LimitCommand implements ICommand {
 			}
 			rateLimitConfig.setTokenLimit(value);
 			config.save();
-			sender.sendTranslatable("patpat.command.ratelimit.set.limit.updated",
+			sender.sendTranslatable("patpat.command.ratelimit.set.limit",
 					Component.text(value).color(NamedTextColor.GOLD));
 		} catch (NumberFormatException ignored) {
 			sender.sendTranslatable(
-					"patpat.command.error.number.not_number",
+					"patpat.command.error.number_not_number",
 					Component.text(strings[0]).color(NamedTextColor.GOLD)
 			);
 		}
