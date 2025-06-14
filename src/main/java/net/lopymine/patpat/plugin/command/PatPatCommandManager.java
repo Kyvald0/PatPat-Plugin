@@ -47,13 +47,15 @@ public class PatPatCommandManager {
 	}
 
 	private static SimpleCommand registerListCommand() {
+		SimpleCommand infoCommand = getSimpleCommand(new ListInfoCommand());
 		SimpleCommand setModeCommand = getSimpleCommand(new ListSetCommand());
 		SimpleCommand addToListCommand = getSimpleCommand(new ListAddCommand());
 		SimpleCommand removeFromListCommand = getSimpleCommand(new ListRemoveCommand());
 
 		return SimpleCommand.builder()
 				.permission(StringUtils.permission("list"))
-				.usage("/patpat list (set | add | remove)")
+				.usage("/patpat list (info | set | add | remove)")
+				.child(infoCommand, "info")
 				.child(setModeCommand, "set")
 				.child(addToListCommand, "add")
 				.child(removeFromListCommand, "remove")

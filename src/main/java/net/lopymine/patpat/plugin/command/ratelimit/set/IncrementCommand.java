@@ -26,20 +26,14 @@ public class IncrementCommand implements ICommand {
 	public void execute(CommandSender sender, String[] strings) {
 		PatPatConfig config = PatPatConfig.getInstance();
 		RateLimitConfig rateLimitConfig = config.getRateLimit();
-		if (strings.length == 0) {
-			sender.sendTranslatable("patpat.command.ratelimit.set.increment.info",
-					Component.text(rateLimitConfig.getTokenIncrement())
-							.color(NamedTextColor.GOLD));
-			return;
-		}
 		if (strings.length > 1) {
-			sender.sendPatPatMessage(this.getExampleOfUsage());
+			sender.sendMsg(this.getExampleOfUsage());
 			return;
 		}
 		try {
 			int value = Integer.parseInt(strings[0]);
 			if (value <= 0) {
-				sender.sendTranslatable(
+				sender.sendMsg(
 						"patpat.command.error.number_less_than",
 						Component.text(value).color(NamedTextColor.GOLD),
 						Component.text(1).color(NamedTextColor.GOLD)
@@ -49,13 +43,13 @@ public class IncrementCommand implements ICommand {
 			rateLimitConfig.setTokenIncrement(value);
 			config.save();
 
-			sender.sendTranslatable(
+			sender.sendMsg(
 					"patpat.command.ratelimit.set.increment",
 					Component.text(value).color(NamedTextColor.GOLD)
 			);
 		} catch (NumberFormatException ignored) {
-			sender.sendTranslatable(
-					"patpat.command.error.number_not_number",
+			sender.sendMsg(
+					"patpat.command.error.not_number",
 					Component.text(strings[0]).color(NamedTextColor.GOLD)
 			);
 		}

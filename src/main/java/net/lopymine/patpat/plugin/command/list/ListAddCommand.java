@@ -1,8 +1,7 @@
 package net.lopymine.patpat.plugin.command.list;
 
 import lombok.experimental.ExtensionMethod;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.*;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.ClickEvent.Action;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -41,7 +40,7 @@ public class ListAddCommand implements ICommand {
 	@Override
 	public void execute(CommandSender sender, String[] strings) {
 		if (strings.length == 0) {
-			sender.sendPatPatMessage(this.getExampleOfUsage());
+			sender.sendMsg(this.getExampleOfUsage());
 		}
 
 		String value = strings[0];
@@ -72,7 +71,7 @@ public class ListAddCommand implements ICommand {
 		}
 
 		if (offlinePlayer == null) {
-			sender.sendTranslatable("patpat.command.error.player_not_exist", Component.text(nickname).color(NamedTextColor.GOLD));
+			sender.sendMsg("patpat.command.error.player_not_exist", Component.text(nickname).color(NamedTextColor.GOLD));
 			return;
 		}
 		addPlayer(sender, offlinePlayer.getUniqueId(), nickname);
@@ -87,10 +86,14 @@ public class ListAddCommand implements ICommand {
 				.clickEvent(ClickEvent.clickEvent(Action.COPY_TO_CLIPBOARD, uuid.toString()));
 
 		if (config.add(uuid, nickname)) {
-			sender.sendTranslatable("patpat.command.list.add.success", nicknameComponent);
+			TranslatableComponent component = Component.translatable("patpat.command.list.add.success")
+					.color(NamedTextColor.GREEN)
+					.args(nicknameComponent);
+
+			sender.sendMsg(component);
 			config.save();
 		} else {
-			sender.sendTranslatable("patpat.command.list.add.already", nicknameComponent);
+			sender.sendMsg("patpat.command.list.add.already", nicknameComponent);
 		}
 	}
 

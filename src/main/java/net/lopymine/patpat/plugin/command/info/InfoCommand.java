@@ -31,6 +31,7 @@ public class InfoCommand implements ICommand {
 		String minecraftVersion = Bukkit.getServer().getVersion();
 		String debugInformation = "Platform: %s%nMinecraft: %s%nVersion: %s"
 				.formatted(PLATFORM, minecraftVersion, pluginVersion);
+
 		ClickEvent clickEvent = ClickEvent.clickEvent(Action.COPY_TO_CLIPBOARD, debugInformation);
 		HoverEvent<Component> hoverEvent = HoverEvent.showText(Component.translatable("patpat.command.info.copy"));
 		Component style = Component.empty().clickEvent(clickEvent).hoverEvent(hoverEvent);
@@ -53,9 +54,9 @@ public class InfoCommand implements ICommand {
 
 	@Override
 	public void execute(CommandSender sender, String[] strings) {
-		sender.sendPatPatMessage(platformComponent);
-		sender.sendPatPatMessage(minecraftVersionComponent);
-		sender.sendPatPatMessage(pluginVersionComponent);
+		sender.sendMsg(this.platformComponent);
+		sender.sendMsg(this.minecraftVersionComponent);
+		sender.sendMsg(this.pluginVersionComponent);
 	}
 
 	@Override

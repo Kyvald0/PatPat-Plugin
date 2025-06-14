@@ -28,7 +28,7 @@ public class ReloadCommand implements ICommand {
 		PlayerListConfig.reload();
 		PatTranslator.unregister();
 		PatTranslator.register();
-		sender.sendTranslatable("patpat.command.reload");
+		sender.sendMsg("patpat.command.reload");
 	}
 
 	@Override

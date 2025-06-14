@@ -1,8 +1,7 @@
 package net.lopymine.patpat.plugin.command.list;
 
 import lombok.experimental.ExtensionMethod;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.*;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.ClickEvent.Action;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -17,7 +16,6 @@ import net.lopymine.patpat.plugin.extension.CommandSenderExtension;
 import net.lopymine.patpat.plugin.util.StringUtils;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 @ExtensionMethod(CommandSenderExtension.class)
 public class ListRemoveCommand implements ICommand {
@@ -43,7 +41,7 @@ public class ListRemoveCommand implements ICommand {
 	@Override
 	public void execute(CommandSender sender, String[] strings) {
 		if (strings.length == 0) {
-			sender.sendPatPatMessage(this.getExampleOfUsage());
+			sender.sendMsg(this.getExampleOfUsage());
 			return;
 		}
 
@@ -69,12 +67,17 @@ public class ListRemoveCommand implements ICommand {
 				.color(NamedTextColor.GOLD)
 				.hoverEvent(HoverEvent.showText(Component.text(uuid.toString())))
 				.clickEvent(ClickEvent.clickEvent(Action.COPY_TO_CLIPBOARD, uuid.toString()));
+
 		PlayerListConfig config = PlayerListConfig.getInstance();
 		if (config.remove(offlinePlayer.getUniqueId())) {
-			sender.sendTranslatable("patpat.command.list.remove", nicknameComponent);
+			TranslatableComponent component = Component.translatable("patpat.command.list.remove.success")
+					.color(NamedTextColor.RED)
+					.args(nicknameComponent);
+
+			sender.sendMsg(component);
 			config.save();
 		} else {
-			sender.sendTranslatable("patpat.command.list.remove.already", nicknameComponent);
+			sender.sendMsg("patpat.command.list.remove.already", nicknameComponent);
 		}
 	}
 
@@ -85,10 +88,14 @@ public class ListRemoveCommand implements ICommand {
 				.text(nickname)
 				.color(NamedTextColor.GOLD);
 		if (config.remove(nickname)) {
-			sender.sendTranslatable("patpat.command.list.remove.success", nicknameComponent);
+			TranslatableComponent component = Component.translatable("patpat.command.list.remove.success")
+					.color(NamedTextColor.RED)
+					.args(nicknameComponent);
+
+			sender.sendMsg(component);
 			config.save();
 		} else {
-			sender.sendTranslatable("patpat.command.list.remove.already", nicknameComponent);
+			sender.sendMsg("patpat.command.list.remove.already", nicknameComponent);
 		}
 	}
 

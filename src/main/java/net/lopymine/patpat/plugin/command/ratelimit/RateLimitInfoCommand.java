@@ -39,13 +39,13 @@ public class RateLimitInfoCommand implements ICommand {
 		if (strings.length > 0) {
 			Player player = Bukkit.getPlayer(strings[0]);
 			if (player == null) {
-				sender.sendTranslatable(
+				sender.sendMsg(
 						"patpat.command.error.player_not_exist",
 						Component.text(strings[0]).color(NamedTextColor.GOLD)
 				);
 				return;
 			}
-			sender.sendTranslatable(
+			sender.sendMsg(
 					"patpat.command.ratelimit.info.player",
 					Component.text(strings[0]).color(NamedTextColor.GOLD)
 			);
@@ -57,7 +57,7 @@ public class RateLimitInfoCommand implements ICommand {
 				tokensComponent = Component.text(RateLimitManager.getAvailablePats(player.getUniqueId()));
 			}
 			tokensComponent = tokensComponent.color(NamedTextColor.GOLD);
-			sender.sendTranslatable("patpat.command.ratelimit.info.tokens", tokensComponent);
+			sender.sendMsg("patpat.command.ratelimit.info.tokens", tokensComponent);
 			return;
 		}
 
@@ -70,11 +70,11 @@ public class RateLimitInfoCommand implements ICommand {
 				.clickEvent(ClickEvent.clickEvent(Action.COPY_TO_CLIPBOARD, config.getPermissionBypass()))
 				.hoverEvent(HoverEvent.showText(Component.translatable("patpat.command.ratelimit.info.permission_bypass.copy")));
 
-		sender.sendTranslatable("patpat.command.ratelimit.info.status", statusComponent);
-		sender.sendTranslatable("patpat.command.ratelimit.set.limit.info", limitComponent);
-		sender.sendTranslatable("patpat.command.ratelimit.set.increment.info", incrementComponent);
-		sender.sendTranslatable("patpat.command.ratelimit.set.interval.info", intervalComponent);
-		sender.sendTranslatable("patpat.command.ratelimit.info.permission_bypass", permissionComponent);
+		sender.sendMsg("patpat.command.ratelimit.info.status", statusComponent);
+		sender.sendMsg("patpat.command.ratelimit.info.limit", limitComponent);
+		sender.sendMsg("patpat.command.ratelimit.info.increment", incrementComponent);
+		sender.sendMsg("patpat.command.ratelimit.info.interval", intervalComponent);
+		sender.sendMsg("patpat.command.ratelimit.info.permission_bypass", permissionComponent);
 	}
 
 	@Override

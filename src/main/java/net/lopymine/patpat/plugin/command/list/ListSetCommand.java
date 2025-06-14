@@ -2,7 +2,6 @@ package net.lopymine.patpat.plugin.command.list;
 
 import lombok.experimental.ExtensionMethod;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 
@@ -35,7 +34,7 @@ public class ListSetCommand implements ICommand {
 	@Override
 	public void execute(CommandSender sender, String[] strings) {
 		if (strings.length == 0) {
-			sender.sendPatPatMessage(this.getExampleOfUsage());
+			sender.sendMsg(this.getExampleOfUsage());
 			return;
 		}
 
@@ -44,20 +43,14 @@ public class ListSetCommand implements ICommand {
 			ListMode listMode = ListMode.valueOf(value);
 			PatPatConfig config = PatPatConfig.getInstance();
 			if (config.getListMode().equals(listMode)) {
-				TextComponent listComponent = Component
-						.text(listMode.name())
-						.color(NamedTextColor.GOLD);
-				sender.sendTranslatable("patpat.command.list.set.already", listComponent);
+				sender.sendMsg("patpat.command.list.set.already", listMode.getText());
 				return;
 			}
 			config.setListMode(listMode);
 			config.save();
-			TextComponent listComponent = Component
-					.text(listMode.name())
-					.color(NamedTextColor.GOLD);
-			sender.sendTranslatable("patpat.command.list.set.success", listComponent);
+			sender.sendMsg("patpat.command.list.set.success", listMode.getText());
 		} catch (IllegalArgumentException e) {
-			sender.sendTranslatable("patpat.command.list.set.failed", Component.text(value).color(NamedTextColor.GOLD));
+			sender.sendMsg("patpat.command.list.set.failed", Component.text(value).color(NamedTextColor.GOLD));
 		}
 	}
 

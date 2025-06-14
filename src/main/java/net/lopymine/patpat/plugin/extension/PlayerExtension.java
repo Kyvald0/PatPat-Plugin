@@ -10,11 +10,11 @@ public class PlayerExtension {
 	}
 
 	public static void sendPatPatMessage(Player sender, String message, Object... args) {
-		CommandSenderExtension.sendPatPatMessage(sender, message, args);
+		CommandSenderExtension.sendMsg(sender, message, args);
 	}
 
 	public static void sendPatPatMessage(Player sender, ComponentLike message) {
-		CommandSenderExtension.sendPatPatMessage(sender, message);
+		CommandSenderExtension.sendMsg(sender, message);
 	}
 
 }

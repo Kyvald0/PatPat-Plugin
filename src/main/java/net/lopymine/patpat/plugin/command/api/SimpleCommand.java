@@ -63,7 +63,7 @@ public final class SimpleCommand implements TabExecutor {
 	public void printDescription(@NotNull CommandSender sender) {
 		if (permission == null || sender.hasPermission(permission)) {
 			if (description != null) {
-				sender.sendPatPatMessage(description);
+				sender.sendMsg(description);
 			}
 			child.values().forEach(simpleCommand -> simpleCommand.printDescription(sender));
 		}
@@ -97,7 +97,7 @@ public final class SimpleCommand implements TabExecutor {
 				return true;
 			}
 			if (msgNoPermission != null) {
-				sender.sendPatPatMessage(msgNoPermission);
+				sender.sendMsg(msgNoPermission);
 			}
 			return true;
 		} catch (Exception ignore) {
