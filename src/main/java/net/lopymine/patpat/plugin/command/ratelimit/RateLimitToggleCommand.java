@@ -24,7 +24,7 @@ public abstract class RateLimitToggleCommand implements ICommand {
 	public void execute(CommandSender sender, String[] strings) {
 		PatPatConfig config = PatPatConfig.getInstance();
 		RateLimitConfig rateLimitConfig = config.getRateLimit();
-		if (rateLimitConfig.isEnabled()) {
+		if (rateLimitConfig.isEnabled() == this.getValue()) {
 			sender.sendMsg("patpat.command.ratelimit.%s.already".formatted(this.getTranslationKey()));
 			return;
 		}

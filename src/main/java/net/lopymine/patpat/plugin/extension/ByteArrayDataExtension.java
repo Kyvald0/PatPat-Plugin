@@ -3,7 +3,6 @@ package net.lopymine.patpat.plugin.extension;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 
-import java.io.IOException;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +21,7 @@ public class ByteArrayDataExtension {
 		out.writeLong(uuid.getLeastSignificantBits());
 	}
 
-	public static <T extends ByteArrayDataInput> int readVarInt(T buf) throws IOException {
+	public static <T extends ByteArrayDataInput> int readVarInt(T buf) throws IllegalArgumentException {
 		int i = 0;
 		int j = 0;
 
@@ -31,14 +30,14 @@ public class ByteArrayDataExtension {
 			b = buf.readByte();
 			i |= (b & 127) << j++ * 7;
 			if (j > 5) {
-				throw new RuntimeException("VarInt too big");
+				throw new IllegalArgumentException("VarInt too big");
 			}
 		} while((b & 128) == 128);
 
 		return i;
 	}
 
-	public static <T extends ByteArrayDataOutput> void writeVarInt(ByteArrayDataOutput output, int value) {
+	public static <T extends ByteArrayDataOutput> void writeVarInt(T output, int value) {
 		while((value & -128) != 0) {
 			output.writeByte(value & 127 | 128);
 			value >>>= 7;

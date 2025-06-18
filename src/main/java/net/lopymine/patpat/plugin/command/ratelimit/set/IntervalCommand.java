@@ -34,7 +34,7 @@ public class IntervalCommand implements ICommand {
 		}
 		try {
 			Time value = Time.of(strings[0]);
-			if (value.getValue() <= 0) {
+			if (value.getValue() < 1) {
 				sender.sendMsg("patpat.command.error.time_less_than",
 						Component.text(value.toString()).color(NamedTextColor.GOLD),
 						Component.text("1sec").color(NamedTextColor.GOLD)

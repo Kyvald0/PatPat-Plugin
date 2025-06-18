@@ -32,7 +32,7 @@ public class LimitCommand implements ICommand {
 		}
 		try {
 			int value = Integer.parseInt(strings[0]);
-			if (value <= 0) {
+			if (value < 1) {
 				sender.sendMsg(
 						"patpat.command.error.number_less_than",
 						Component.text(value).color(NamedTextColor.GOLD),

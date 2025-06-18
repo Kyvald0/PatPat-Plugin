@@ -22,6 +22,14 @@ import java.util.List;
 @ExtensionMethod(CommandSenderExtension.class)
 public class RateLimitInfoCommand implements ICommand {
 
+	private static final Component FORMATTER_ENABLED = Component
+			.translatable("patpat.formatter.enabled_or_disabled.true")
+			.color(NamedTextColor.GREEN);
+
+	private static final Component FORMATTER_DISABLED = Component
+			.translatable("patpat.formatter.enabled_or_disabled.false")
+			.color(NamedTextColor.RED);
+
 	@Override
 	public List<String> getSuggestions(CommandSender sender, String[] strings) {
 		if (strings.length == 1) {
@@ -61,7 +69,7 @@ public class RateLimitInfoCommand implements ICommand {
 			return;
 		}
 
-		Component statusComponent = Component.translatable("formatter.enabled_or_disabled." + config.isEnabled());
+		Component statusComponent = config.isEnabled() ? FORMATTER_ENABLED : FORMATTER_DISABLED;
 		Component limitComponent = Component.text(config.getTokenLimit()).color(NamedTextColor.GOLD);
 		Component incrementComponent = Component.text(config.getTokenIncrement()).color(NamedTextColor.GOLD);
 		Component intervalComponent = Component.text(config.getTokenInterval().toString()).color(NamedTextColor.GOLD);

@@ -1,16 +1,15 @@
 package net.lopymine.patpat.plugin.util;
 
+import lombok.experimental.UtilityClass;
+
 import net.lopymine.patpat.plugin.command.ratelimit.RateLimitUnit;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@UtilityClass
 public class TimeUtils {
-
-	private TimeUtils() {
-		throw new IllegalStateException("Utility class");
-	}
 
 	private static final Set<String> DAY_ENDING = Set.of("days", "day", "d");
 	private static final Set<String> HOUR_ENDING = Set.of("hours", "hour", "h");
@@ -20,7 +19,6 @@ public class TimeUtils {
 	private static final String UNITS = Stream.of(DAY_ENDING, HOUR_ENDING, MINUTE_ENDING, SECOND_ENDING)
 			.flatMap(Set::stream)
 			.collect(Collectors.joining(", "));
-
 
 	public static RateLimitUnit getUnit(String unit) {
 		if (unit.isEmpty() || SECOND_ENDING.contains(unit)) {
@@ -37,4 +35,5 @@ public class TimeUtils {
 		}
 		throw new IllegalArgumentException("'%s' is not unit, available units: %s".formatted(unit, UNITS));
 	}
+
 }

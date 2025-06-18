@@ -4,6 +4,7 @@ import net.lopymine.patpat.plugin.PatPatPlugin;
 
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("unused")
 public record Version(int major, int minor, int patch) implements Comparable<Version> {
 
 	public static final Version INVALID = new Version(-1, -1, -1);
@@ -76,7 +77,10 @@ public record Version(int major, int minor, int patch) implements Comparable<Ver
 
 	@Override
 	public int compareTo(@NotNull Version o) {
-		return o.is(this) ? 0 : o.isMoreThan(this) ? 1 : -1;
+		if (o.is(this)) {
+			return 0;
+		}
+		return o.isMoreThan(this) ? 1 : -1;
 	}
 
 	static {
