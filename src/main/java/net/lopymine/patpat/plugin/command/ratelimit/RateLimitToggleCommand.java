@@ -2,7 +2,6 @@ package net.lopymine.patpat.plugin.command.ratelimit;
 
 import lombok.experimental.ExtensionMethod;
 import net.kyori.adventure.text.*;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 
 import net.lopymine.patpat.plugin.command.api.ICommand;
@@ -32,9 +31,7 @@ public abstract class RateLimitToggleCommand implements ICommand {
 		config.save();
 		RateLimitManager.reloadTask();
 
-		TranslatableComponent text = Component.translatable("patpat.command.ratelimit.%s.success".formatted(this.getTranslationKey()))
-				.color(this.getColor());
-		sender.sendMsg(text);
+		sender.sendMsg(this.getComponent());
 	}
 
 	@Override
@@ -57,5 +54,5 @@ public abstract class RateLimitToggleCommand implements ICommand {
 
 	protected abstract boolean getValue();
 
-	protected abstract NamedTextColor getColor();
+	protected abstract Component getComponent();
 }

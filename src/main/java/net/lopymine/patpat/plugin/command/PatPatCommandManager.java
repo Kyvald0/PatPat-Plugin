@@ -33,7 +33,7 @@ public class PatPatCommandManager {
 		SimpleCommand infoCommand = getSimpleCommand(new InfoCommand());
 
 		SimpleCommand rootCommand = SimpleCommand.builder()
-				.usage(PatPatCommandManager.getPluginMessage("/patpat (info | list | ratelimit | reload)"))
+				.usage("/patpat (info | list | ratelimit | reload)")
 				.child(listCommand, "list")
 				.child(rateLimitCommand, "ratelimit")
 				.child(reloadCommand, "reload")

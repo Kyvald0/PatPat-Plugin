@@ -23,7 +23,6 @@ public class PatPatPlayerEventHandler implements Listener {
 	@EventHandler
 	public void channelRegister(PlayerRegisterChannelEvent event) {
 		String channel = event.getChannel();
-		PatLogger.debug("Channel registered: %s", channel);
 		if(HelloPacketHandler.HELLO_PATPAT_PLAYER_S2C_PACKET.equals(channel)){
 			PatLogger.debug("Channel %s is registered, sending hello packet", channel);
 			HelloPacketHandler.sendHelloPacket(event.getPlayer());
@@ -32,15 +31,13 @@ public class PatPatPlayerEventHandler implements Listener {
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
-		PatPlayer patPlayer = PatPlayer.register(event.getPlayer());
-		PatLogger.debug("Player %s joined", patPlayer.getName());
+		PatPlayer.register(event.getPlayer());
 	}
 
 	@EventHandler
 	public void onQuit(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
 		PatPlayer.unregister(player);
-		PatLogger.debug("Player %s quit", player.getName());
 	}
 
 }

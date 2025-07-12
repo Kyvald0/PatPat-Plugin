@@ -19,6 +19,8 @@ import java.util.List;
 @ExtensionMethod(CommandSenderExtension.class)
 public class IntervalCommand implements ICommand {
 
+	private static final Component ONE_SECOND_COMPONENT = Component.text("1sec").color(NamedTextColor.GOLD);
+
 	@Override
 	public List<String> getSuggestions(CommandSender sender, String[] strings) {
 		return Collections.emptyList();
@@ -28,6 +30,13 @@ public class IntervalCommand implements ICommand {
 	public void execute(CommandSender sender, String[] strings) {
 		PatPatConfig config = PatPatConfig.getInstance();
 		RateLimitConfig rateLimitConfig = config.getRateLimit();
+		if (strings.length == 0) {
+			sender.sendMsg(
+					"patpat.command.ratelimit.info.interval",
+					Component.text(rateLimitConfig.getTokenInterval().toString()).color(NamedTextColor.GOLD)
+			);
+			return;
+		}
 		if (strings.length > 1) {
 			sender.sendMsg(this.getExampleOfUsage());
 			return;
@@ -37,7 +46,7 @@ public class IntervalCommand implements ICommand {
 			if (value.getValue() < 1) {
 				sender.sendMsg("patpat.command.error.time_less_than",
 						Component.text(value.toString()).color(NamedTextColor.GOLD),
-						Component.text("1sec").color(NamedTextColor.GOLD)
+						ONE_SECOND_COMPONENT
 				);
 				return;
 			}

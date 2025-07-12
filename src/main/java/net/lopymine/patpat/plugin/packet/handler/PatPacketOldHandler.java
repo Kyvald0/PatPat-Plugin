@@ -36,7 +36,7 @@ public class PatPacketOldHandler extends PatPacketHandler {
 			.append(getButtons());
 
 	private static Component getButtons() {
-		String modrinthLink = "https://modrinth.com/plugin/patpat";
+		String modrinthLink = "https://modrinth.com/mod/patpat";
 		String curseForgeLink = "https://www.curseforge.com/minecraft/mc-mods/patpat";
 		TranslatableComponent open = Component.translatable("patpat.link.open");
 		Component modrinthText = Component.text("Modrinth").color(NamedTextColor.GREEN);

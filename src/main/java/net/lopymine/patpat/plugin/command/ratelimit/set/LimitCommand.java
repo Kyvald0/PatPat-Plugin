@@ -17,6 +17,8 @@ import java.util.List;
 @ExtensionMethod(CommandSenderExtension.class)
 public class LimitCommand implements ICommand {
 
+	private static final Component ONE_COMPONENT = Component.text(1).color(NamedTextColor.GOLD);
+
 	@Override
 	public List<String> getSuggestions(CommandSender sender, String[] strings) {
 		return Collections.emptyList();
@@ -26,6 +28,13 @@ public class LimitCommand implements ICommand {
 	public void execute(CommandSender sender, String[] strings) {
 		PatPatConfig config = PatPatConfig.getInstance();
 		RateLimitConfig rateLimitConfig = config.getRateLimit();
+		if (strings.length == 0) {
+			sender.sendMsg(
+					"patpat.command.ratelimit.info.limit",
+					Component.text(rateLimitConfig.getTokenLimit()).color(NamedTextColor.GOLD)
+			);
+			return;
+		}
 		if (strings.length > 1) {
 			sender.sendMsg(this.getExampleOfUsage());
 			return;
@@ -36,7 +45,7 @@ public class LimitCommand implements ICommand {
 				sender.sendMsg(
 						"patpat.command.error.number_less_than",
 						Component.text(value).color(NamedTextColor.GOLD),
-						Component.text(1).color(NamedTextColor.GOLD)
+						ONE_COMPONENT
 				);
 				return;
 			}

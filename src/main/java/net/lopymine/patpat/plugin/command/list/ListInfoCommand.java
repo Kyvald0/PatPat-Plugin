@@ -15,7 +15,7 @@ import java.util.*;
 @ExtensionMethod(CommandSenderExtension.class)
 public class ListInfoCommand implements ICommand {
 
-	public static final Component EMPTY_TEXT_STYLE = Component.empty()
+	public static final Component EMPTY_TEXT = Component.translatable("patpat.command.list.empty")
 			.color(NamedTextColor.GRAY)
 			.decorate(TextDecoration.ITALIC);
 
@@ -34,8 +34,7 @@ public class ListInfoCommand implements ICommand {
 		Component playersText = Component.empty();
 
 		if (!iterator.hasNext()) {
-			playersText = Component.translatable("patpat.command.list.empty")
-					.mergeStyle(EMPTY_TEXT_STYLE);
+			playersText = EMPTY_TEXT;
 		}
 
 		while (iterator.hasNext()) {
@@ -46,8 +45,8 @@ public class ListInfoCommand implements ICommand {
 		Component contentComponent = Component.text(values.size())
 				.color(NamedTextColor.GOLD);
 
-		sender.sendMsg("list.info.mode", config.getListMode().getText());
-		sender.sendMsg("list.info.content", contentComponent);
+		sender.sendMsg("patpat.command.list.info.mode", config.getListMode().getText());
+		sender.sendMsg("patpat.command.list.info.content", contentComponent);
 		sender.sendMsg(playersText);
 	}
 
