@@ -12,10 +12,10 @@ import net.lopymine.patpat.plugin.config.adapter.TimeAdapter;
 public class RateLimitConfig {
 
 	private boolean enabled;
-	private int tokenLimit;
-	private int tokenIncrement;
+	private int tokenLimit = 20;
+	private int tokenIncrement = 1;
 	@JsonAdapter(TimeAdapter.class)
-	private Time tokenInterval;
-	private String permissionBypass;
+	private Time tokenInterval = Time.of("1s");
+	private String permissionBypass = "patpat.ratelimit.bypass";
 
 }
