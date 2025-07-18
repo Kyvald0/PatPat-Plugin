@@ -1,68 +1,99 @@
 package net.lopymine.patpat.plugin.config;
 
-import com.google.gson.Gson;
 import lombok.Getter;
 
+import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.PatPatPlugin;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
-import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 @Getter
 public class PlayerListConfig {
 
-	private static final Gson GSON = new Gson();
+	@Getter
+	private static PlayerListConfig instance;
 
-	private final Set<UUID> uuids;
+	private static final String FILENAME = "player-list.txt";
+	private static final File CONFIG_FILE = new File(PatPatPlugin.getInstance().getDataFolder(), FILENAME);
 
-	public PlayerListConfig() {
-		this.uuids = new HashSet<>();
+	private final Map<UUID, String> nicknameByUuid = new HashMap<>();
+
+	public boolean add(UUID uuid, String nickname) {
+		return !Objects.equals(nicknameByUuid.put(uuid, nickname), nickname);
 	}
 
-	public static PlayerListConfig getInstance() {
-		return PlayerListConfig.read();
+	public boolean remove(UUID uuid) {
+		return nicknameByUuid.remove(uuid) != null;
 	}
 
-	public static PlayerListConfig create() {
-		PlayerListConfig playerListConfig = new PlayerListConfig();
+	public boolean remove(String nickname) {
+		boolean success = false;
+		while (nicknameByUuid.containsValue(nickname)) {
+			success = true;
+			nicknameByUuid.values().remove(nickname);
+		}
+		return success;
+	}
 
-		String json = GSON.toJson(playerListConfig);
+	public Set<UUID> getUuids() {
+		return nicknameByUuid.keySet();
+	}
 
-		try (FileWriter writer = new FileWriter(getConfigPath())) {
-			writer.write(json);
+	public Collection<String> getNicknames() {
+		return nicknameByUuid.values();
+	}
+
+	private static boolean create() {
+		if (!CONFIG_FILE.exists()) {
+			try {
+				Files.createFile(CONFIG_FILE.toPath());
+			} catch (Exception e) {
+				PatLogger.error("Failed to create PlayerListConfig:", e);
+				return false;
+			}
+		}
+		return CONFIG_FILE.exists();
+	}
+
+	public static void reload() {
+		if (!create()) {
+			PatLogger.error("Failed to reload PlayerListConfig!");
+			return;
+		}
+		PlayerListConfig config = new PlayerListConfig();
+
+		int lineNumber = 0;
+		String line = null;
+		try (BufferedReader reader = new BufferedReader(new FileReader(CONFIG_FILE))) {
+			line = reader.readLine();
+			while (line != null) {
+				lineNumber++;
+				String[] uuidNicknamePair = line.split(" ");
+				config.nicknameByUuid.put(UUID.fromString(uuidNicknamePair[0]), uuidNicknamePair[1]);
+				line = reader.readLine();
+			}
+			instance = config;
+		} catch (IllegalArgumentException e) {
+			PatLogger.error("Failed to parse line %d in PlayerListConfig: '%s' is not uuid!", lineNumber, line == null ? "null" : line);
 		} catch (Exception e) {
-			PatPatPlugin.getInstance().getLogger().log(Level.WARNING, "Failed to create player list config!", e);
+			PatLogger.error("Failed to reload PlayerListConfig:", e);
 		}
-
-		return playerListConfig;
-	}
-
-	private static PlayerListConfig read() {
-		File configPath = getConfigPath();
-		if (!configPath.exists()) {
-			return create();
-		}
-
-		try (FileReader reader = new FileReader(configPath)) {
-			return GSON.fromJson(reader, PlayerListConfig.class);
-		} catch (Exception e) {
-			PatPatPlugin.getInstance().getLogger().log(Level.WARNING, "Failed to read player list config!", e);
-		}
-
-		return create();
-	}
-
-	private static File getConfigPath() {
-		return new File(PatPatPlugin.getInstance().getDataFolder(), "player-list.json");
 	}
 
 	public void save() {
-		String json = GSON.toJson(this, PlayerListConfig.class);
-		try (FileWriter writer = new FileWriter(getConfigPath())) {
-			writer.write(json);
+		try (FileWriter writer = new FileWriter(CONFIG_FILE, StandardCharsets.UTF_8)) {
+			writer.write(nicknameByUuid
+					.entrySet()
+					.stream()
+					.map(entry -> "%s %s".formatted(entry.getKey(), entry.getValue()))
+					.collect(Collectors.joining("\n"))
+			);
 		} catch (Exception e) {
-			PatPatPlugin.getInstance().getLogger().log(Level.WARNING, "Failed to save player list config!", e);
+			PatLogger.error("Failed to save PlayerListConfig:", e);
 		}
 	}
 }

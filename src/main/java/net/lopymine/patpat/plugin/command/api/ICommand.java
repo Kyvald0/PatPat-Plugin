@@ -1,5 +1,6 @@
 package net.lopymine.patpat.plugin.command.api;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
@@ -14,6 +15,6 @@ public interface ICommand {
 
 	String getExampleOfUsage();
 
-	String getDescription();
+	Component getDescription();
 
 }

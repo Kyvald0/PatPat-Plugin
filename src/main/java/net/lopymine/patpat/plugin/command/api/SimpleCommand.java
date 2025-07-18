@@ -1,11 +1,16 @@
 package net.lopymine.patpat.plugin.command.api;
 
+import lombok.experimental.ExtensionMethod;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.*;
+import org.bukkit.entity.Player;
 
 import net.lopymine.patpat.plugin.command.PatPatCommandManager;
+import net.lopymine.patpat.plugin.extension.CommandSenderExtension;
 
 import java.util.*;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -14,28 +19,36 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>
  * By nikita51
  */
+
 @SuppressWarnings("unused")
+@ExtensionMethod(CommandSenderExtension.class)
 public final class SimpleCommand implements TabExecutor {
 
-	private final String description;
-	private final String msgNoPermission;
+	private final Component description;
+	private final String msgOnlyForPlayer;
+	private final Component msgNoPermission;
 	private final String usage;
 	private final String permission;
 	private final ICommand command;
 	private final Map<String, SimpleCommand> child;
+	private final boolean onlyForPlayer;
 
 	private SimpleCommand(@Nullable ICommand command,
-	                      @Nullable String description,
-	                      @Nullable String msgNoPermission,
+	                      @Nullable Component description,
+	                      boolean onlyForPlayer,
+	                      @Nullable String msgOnlyForPlayer,
+	                      @Nullable Component msgNoPermission,
 	                      @Nullable String usage,
 	                      @Nullable String permission,
 	                      @Nullable Map<String, SimpleCommand> child) {
-		this.command         = command;
-		this.usage           = usage;
-		this.permission      = permission;
-		this.description     = description;
-		this.msgNoPermission = msgNoPermission;
-		this.child           = Objects.requireNonNullElseGet(child, HashMap::new);
+		this.command          = command;
+		this.usage            = usage;
+		this.permission       = permission;
+		this.description      = description;
+		this.onlyForPlayer    = onlyForPlayer;
+		this.msgOnlyForPlayer = msgOnlyForPlayer;
+		this.msgNoPermission  = msgNoPermission;
+		this.child            = Objects.requireNonNullElseGet(child, HashMap::new);
 	}
 
 	public static Builder builder() {
@@ -50,7 +63,7 @@ public final class SimpleCommand implements TabExecutor {
 	public void printDescription(@NotNull CommandSender sender) {
 		if (permission == null || sender.hasPermission(permission)) {
 			if (description != null) {
-				sender.sendMessage(description);
+				sender.sendMsg(description);
 			}
 			child.values().forEach(simpleCommand -> simpleCommand.printDescription(sender));
 		}
@@ -59,6 +72,12 @@ public final class SimpleCommand implements TabExecutor {
 	@Override
 	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 		try {
+			if (onlyForPlayer && !(sender instanceof Player)) {
+				if (msgOnlyForPlayer != null) {
+					sender.sendMessage(msgOnlyForPlayer);
+				}
+				return false;
+			}
 			if (permission == null || sender.hasPermission(permission)) {
 				if (args.length == 0) {
 					accept(sender, args);
@@ -78,7 +97,7 @@ public final class SimpleCommand implements TabExecutor {
 				return true;
 			}
 			if (msgNoPermission != null) {
-				sender.sendMessage(msgNoPermission);
+				sender.sendMsg(msgNoPermission);
 			}
 			return true;
 		} catch (Exception ignore) {
@@ -90,7 +109,6 @@ public final class SimpleCommand implements TabExecutor {
 		if (command != null) {
 			command.execute(sender, args);
 		} else if (usage != null) {
-			PatPatCommandManager.sendMessage(sender, PatPatCommandManager.getWrongMessage("command"));
 			PatPatCommandManager.sendMessage(sender, usage);
 		}
 	}
@@ -126,9 +144,11 @@ public final class SimpleCommand implements TabExecutor {
 	public static final class Builder {
 
 		@Nullable
-		private String description;
+		private Component description;
+		private boolean onlyForPlayer = false;
 		@Nullable
-		private String msgNoPermission;
+		private String msgOnlyForPlayer;
+		private @Nullable Component msgNoPermission;
 		@Nullable
 		private String usage;
 		@Nullable
@@ -147,8 +167,29 @@ public final class SimpleCommand implements TabExecutor {
 		 * @param description the command description
 		 * @return {@link Builder}
 		 */
-		public Builder description(@Nullable String description) {
+		public Builder description(@Nullable Component description) {
 			this.description = description;
+			return this;
+		}
+
+		/**
+		 * Sets this command executes only for player
+		 *
+		 * @return {@link Builder}
+		 */
+		public Builder onlyForPlayer() {
+			this.onlyForPlayer = true;
+			return this;
+		}
+
+		/**
+		 * Sets message which will be sent to user when user is not player
+		 *
+		 * @param msgOnlyForPlayer the message
+		 * @return {@link Builder}
+		 */
+		public Builder msgOnlyForPlayer(@Nullable String msgOnlyForPlayer) {
+			this.msgOnlyForPlayer = msgOnlyForPlayer;
 			return this;
 		}
 
@@ -158,7 +199,7 @@ public final class SimpleCommand implements TabExecutor {
 		 * @param msgNoPermission the message
 		 * @return {@link Builder}
 		 */
-		public Builder msgNoPermission(@Nullable String msgNoPermission) {
+		public Builder msgNoPermission(@Nullable Component msgNoPermission) {
 			this.msgNoPermission = msgNoPermission;
 			return this;
 		}
@@ -224,7 +265,7 @@ public final class SimpleCommand implements TabExecutor {
 			if (this.childCommandMap == null || this.childCommandMap.isEmpty()) {
 				checkNotNull(this.command, "An executor is required");
 			}
-			return new SimpleCommand(this.command, this.description, this.msgNoPermission, this.usage, this.permission, this.childCommandMap);
+			return new SimpleCommand(this.command, this.description, this.onlyForPlayer, this.msgOnlyForPlayer, this.msgNoPermission, this.usage, this.permission, this.childCommandMap);
 		}
 	}
 }

@@ -1,51 +1,56 @@
 package net.lopymine.patpat.plugin;
 
-import lombok.*;
+import lombok.Getter;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.lopymine.patpat.plugin.command.PatPatCommandManager;
-import net.lopymine.patpat.plugin.config.*;
-import net.lopymine.patpat.plugin.packet.PatPatPacketManager;
+import net.lopymine.patpat.plugin.config.PatPatConfig;
+import net.lopymine.patpat.plugin.config.PlayerListConfig;
+import net.lopymine.patpat.plugin.config.migrate.MigrateManager;
+import net.lopymine.patpat.plugin.event.PatPatPlayerEventHandler;
+import net.lopymine.patpat.plugin.packet.manager.PatPatPacketManager;
 
-import java.util.logging.Level;
+@Getter
+public class PatPatPlugin extends JavaPlugin {
 
-public final class PatPatPlugin extends JavaPlugin {
-
+	public static final String PLUGIN_ID = "patpat-plugin";
 	public static final String MOD_ID = "patpat";
-	@Setter
+
 	@Getter
 	private static PatPatPlugin instance;
-	@Setter
-	@Getter
-	private PatPatConfig patPatConfig;
-	@Setter
-	@Getter
-	private PlayerListConfig playerListConfig;
 
-	public static String id(String path) {
-		return "%s:%s".formatted(MOD_ID, path);
-	}
-
-	public static String permission(String permission) {
-		return "%s.%s".formatted(MOD_ID, permission);
-	}
+	@Getter
+	private static BukkitAudiences adventure;
 
 	@Override
+	@SuppressWarnings("java:S2696") // Plugins system
 	public void onEnable() {
-		PatPatPlugin.setInstance(this);
-
-		if (!this.getDataFolder().mkdirs()) {
-			this.getLogger().log(Level.WARNING, "Failed to create data folder for PatPat Plugin!");
+		instance  = this;
+		adventure = BukkitAudiences.create(this);
+		if (!this.getDataFolder().exists() && !this.getDataFolder().mkdirs()) {
+			PatLogger.warn("Failed to create config folder for PatPat Plugin!");
 		}
-		this.setPatPatConfig(PatPatConfig.getInstance());
-		this.setPlayerListConfig(PlayerListConfig.getInstance());
+		MigrateManager.migrate();
+		PatPatConfig.reload();
+		PlayerListConfig.reload();
+		MigrateManager.checkVersion();
 
 		PatPatPacketManager.register();
 		PatPatCommandManager.register();
+		PatPatPlayerEventHandler.register();
+		PatTranslator.register();
+
+		PatLogger.info("Plugin started");
 	}
 
 	@Override
+	@SuppressWarnings("java:S2696") // Plugins system
 	public void onDisable() {
-		// Plugin shutdown logic
+		if (adventure != null) {
+			adventure.close();
+			adventure = null;
+		}
+		PatTranslator.unregister();
 	}
 }
