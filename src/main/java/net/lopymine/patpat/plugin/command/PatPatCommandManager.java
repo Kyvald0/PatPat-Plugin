@@ -59,6 +59,7 @@ public class PatPatCommandManager {
 				.child(setModeCommand, "set")
 				.child(addToListCommand, "add")
 				.child(removeFromListCommand, "remove")
+				.msgNoPermission(NO_PERMISSION_MESSAGE)
 				.build();
 	}
 
@@ -77,6 +78,7 @@ public class PatPatCommandManager {
 				.child(incrementCommand, "increment")
 				.child(intervalCommand, "interval")
 				.child(limitCommand, "limit")
+				.msgNoPermission(NO_PERMISSION_MESSAGE)
 				.build();
 
 		return SimpleCommand.builder()
@@ -86,6 +88,7 @@ public class PatPatCommandManager {
 				.child(disableCommand, "disable", "off")
 				.child(infoCommand, "info")
 				.child(setCommand, "set")
+				.msgNoPermission(NO_PERMISSION_MESSAGE)
 				.build();
 	}
 

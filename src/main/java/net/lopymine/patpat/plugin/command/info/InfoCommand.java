@@ -20,24 +20,23 @@ import java.util.List;
 @ExtensionMethod(CommandSenderExtension.class)
 public class InfoCommand implements ICommand {
 
-	private static final String PLATFORM = "Bukkit";
-
 	private final Component platformComponent;
 	private final Component pluginVersionComponent;
 	private final Component minecraftVersionComponent;
 
 	public InfoCommand() {
 		String pluginVersion = PatPatPlugin.getInstance().getDescription().getVersion();
+		String platformVersion = Bukkit.getServer().getName();
 		String minecraftVersion = Bukkit.getServer().getVersion();
 		String debugInformation = "Platform: %s%nMinecraft: %s%nVersion: %s"
-				.formatted(PLATFORM, minecraftVersion, pluginVersion);
+				.formatted(platformVersion, minecraftVersion, pluginVersion);
 
 		ClickEvent clickEvent = ClickEvent.clickEvent(Action.COPY_TO_CLIPBOARD, debugInformation);
 		HoverEvent<Component> hoverEvent = HoverEvent.showText(Component.translatable("patpat.command.info.copy"));
 		Component style = Component.empty().clickEvent(clickEvent).hoverEvent(hoverEvent);
 
 		this.platformComponent         = Component.translatable("patpat.command.info.platform")
-				.args(Component.text(PLATFORM).color(NamedTextColor.GOLD))
+				.args(Component.text(platformVersion).color(NamedTextColor.GOLD))
 				.mergeStyle(style);
 		this.pluginVersionComponent    = Component.translatable("patpat.command.info.version")
 				.args(Component.text(pluginVersion).color(NamedTextColor.GOLD))

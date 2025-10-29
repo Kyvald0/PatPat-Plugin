@@ -26,7 +26,7 @@ public class PatPatPacketListener implements PluginMessageListener {
 		if (packetHandler == null) {
 			return;
 		}
-		PatLogger.debug("Handling packet with " + packetHandler.getClass() + " from packet id" + packetHandler.getIncomingPacketId());
+		PatLogger.debug("Handling packet with " + packetHandler.getClass() + " from packet id " + packetHandler.getIncomingPacketId());
 		packetHandler.handle(patPlayer, ByteStreams.newDataInput(bytes));
 	}
 

@@ -20,6 +20,7 @@ import java.util.List;
 public class IntervalCommand implements ICommand {
 
 	private static final Component ONE_SECOND_COMPONENT = Component.text("1sec").color(NamedTextColor.GOLD);
+	private static final Component TIME_EXAMPLES_COMPONENT = Component.text("1sec, 5s, 5min").color(NamedTextColor.GRAY);
 
 	@Override
 	public List<String> getSuggestions(CommandSender sender, String[] strings) {
@@ -57,7 +58,8 @@ public class IntervalCommand implements ICommand {
 					Component.text(value.toString()).color(NamedTextColor.GOLD));
 		} catch (IllegalArgumentException ignored) {
 			sender.sendMsg("patpat.command.error.not_time",
-					Component.text(strings[0]).color(NamedTextColor.GOLD)
+					Component.text(strings[0]).color(NamedTextColor.GOLD),
+					TIME_EXAMPLES_COMPONENT
 			);
 		}
 	}
