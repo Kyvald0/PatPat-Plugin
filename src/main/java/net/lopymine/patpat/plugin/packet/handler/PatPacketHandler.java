@@ -3,6 +3,9 @@ package net.lopymine.patpat.plugin.packet.handler;
 import com.google.common.io.ByteArrayDataInput;
 import lombok.experimental.ExtensionMethod;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.*;
 
 import net.lopymine.patpat.plugin.PatLogger;
@@ -17,6 +20,7 @@ import net.lopymine.patpat.plugin.packet.*;
 import net.lopymine.patpat.plugin.util.StringUtils;
 
 import java.util.*;
+import java.util.function.*;
 import org.jetbrains.annotations.Nullable;
 
 @ExtensionMethod(ByteArrayDataExtension.class)
@@ -26,8 +30,27 @@ public class PatPacketHandler implements IPacketHandler {
 	private static final String PATPAT_S2C_PACKET_ID_V2 = StringUtils.modId("pat_entity_s2c_packet_v2");
 
 	private static final Set<IPatPacket> PAT_PACKET_HANDLERS = new LinkedHashSet<>();
+	private static final Function<Player, Double> GET_INTERACT_DISTANCE = getInteractDistanceFunction();
 
+	private static final double DEFAULT_SQUARED_DISTANCE = 25;
 	private final double patVisibilityRadius = Bukkit.getServer().getViewDistance() * 16D;
+
+
+	private static Function<Player, Double> getInteractDistanceFunction(){
+		try {
+			Attribute attribute = Attribute.PLAYER_ENTITY_INTERACTION_RANGE;
+			return player -> {
+				AttributeInstance attr = player.getAttribute(attribute);
+				if(attr == null){
+					return DEFAULT_SQUARED_DISTANCE;
+				}
+				double temp = attr.getValue()+0.31;
+				return temp*temp;
+			};
+		} catch (NoSuchFieldError e){
+			return player -> DEFAULT_SQUARED_DISTANCE;
+		}
+	}
 
 	public PatPacketHandler() {
 		// MUST be in order from newer to older
@@ -45,9 +68,15 @@ public class PatPacketHandler implements IPacketHandler {
 	@Override
 	public void handle(PatPlayer sender, ByteArrayDataInput buf) {
 		PatPatPlugin plugin = PatPatPlugin.getInstance();
-		if (!this.canHandle(sender.getPlayer())) {
+		Player senderPlayer = sender.getPlayer();
+		if (!this.canHandle(senderPlayer)) {
 			return;
 		}
+
+		if (senderPlayer.getGameMode() == GameMode.SPECTATOR || senderPlayer.isDead()) {
+			return;
+		}
+
 		IPatPacket senderPacketHandler = sender.getPatPacketHandler();
 		if (senderPacketHandler == null) {
 			PatLogger.debug("Not found packet handler for player with PatPat version: %s", sender.getVersion());
@@ -60,6 +89,18 @@ public class PatPacketHandler implements IPacketHandler {
 		}
 
 		if (livingEntity.isInvisible()) {
+			return;
+		}
+
+		if(pattedEntity.equals(senderPlayer)){
+			return;
+		}
+
+		if (senderPlayer.getWorld() != livingEntity.getWorld()) {
+			return;
+		}
+
+		if (senderPlayer.getLocation().distanceSquared(livingEntity.getLocation()) > GET_INTERACT_DISTANCE.apply(senderPlayer)){
 			return;
 		}
 
@@ -94,7 +135,7 @@ public class PatPacketHandler implements IPacketHandler {
 			}
 			PatPacket packet = packets.computeIfAbsent(
 					packetHandler.getPacketHandlerId(),
-					s -> packetHandler.getPacket(pattedEntity, sender.getPlayer())
+					s -> packetHandler.getPacket(pattedEntity, senderPlayer)
 			);
 			PatLogger.debug("Sending out pat packet to %s with id %s and data %s", player.getName(), packet.channel(), Arrays.toString(packet.bytes()));
 			player.sendPluginMessage(plugin, packet.channel(), packet.bytes());

@@ -45,8 +45,8 @@ dependencies {
 	implementation("org.jetbrains:annotations:${prop("jetbrains-annotations")}")
 
 	// Adventure-API
-	implementation("net.kyori:adventure-platform-bukkit:4.3.4")
-	extraLibs("net.kyori:adventure-platform-bukkit:4.3.4")
+	implementation("net.kyori:adventure-platform-bukkit:4.4.1")
+	extraLibs("net.kyori:adventure-platform-bukkit:4.4.1")
 
 	testImplementation('ch.qos.logback:logback-classic:1.5.18')
 	testImplementation(platform('org.junit:junit-bom:5.12.2'))
