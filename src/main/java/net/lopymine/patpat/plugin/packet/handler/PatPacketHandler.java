@@ -2,11 +2,11 @@ package net.lopymine.patpat.plugin.packet.handler;
 
 import com.google.common.io.ByteArrayDataInput;
 import lombok.experimental.ExtensionMethod;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.*;
+import org.bukkit.util.BoundingBox;
 
 import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.PatPatPlugin;
@@ -20,7 +20,7 @@ import net.lopymine.patpat.plugin.packet.*;
 import net.lopymine.patpat.plugin.util.StringUtils;
 
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Function;
 import org.jetbrains.annotations.Nullable;
 
 @ExtensionMethod(ByteArrayDataExtension.class)
@@ -32,23 +32,23 @@ public class PatPacketHandler implements IPacketHandler {
 	private static final Set<IPatPacket> PAT_PACKET_HANDLERS = new LinkedHashSet<>();
 	private static final Function<Player, Double> GET_INTERACT_DISTANCE = getInteractDistanceFunction();
 
-	private static final double DEFAULT_SQUARED_DISTANCE = 25;
+	private static final double CREATIVE_INTERACT_DISTANCE = 3.1;
+	private static final double SURVIVOR_INTERACT_DISTANCE = 5.1;
 	private final double patVisibilityRadius = Bukkit.getServer().getViewDistance() * 16D;
 
 
-	private static Function<Player, Double> getInteractDistanceFunction(){
+	private static Function<Player, Double> getInteractDistanceFunction() {
 		try {
 			Attribute attribute = Attribute.PLAYER_ENTITY_INTERACTION_RANGE;
 			return player -> {
 				AttributeInstance attr = player.getAttribute(attribute);
-				if(attr == null){
-					return DEFAULT_SQUARED_DISTANCE;
+				if (attr == null) {
+					return player.getGameMode() == GameMode.CREATIVE ? CREATIVE_INTERACT_DISTANCE : SURVIVOR_INTERACT_DISTANCE;
 				}
-				double temp = attr.getValue()+0.31;
-				return temp*temp;
+				return attr.getValue() + 0.1;
 			};
-		} catch (NoSuchFieldError e){
-			return player -> DEFAULT_SQUARED_DISTANCE;
+		} catch (NoSuchFieldError e) {
+			return player -> player.getGameMode() == GameMode.CREATIVE ? CREATIVE_INTERACT_DISTANCE : SURVIVOR_INTERACT_DISTANCE;
 		}
 	}
 
@@ -92,7 +92,7 @@ public class PatPacketHandler implements IPacketHandler {
 			return;
 		}
 
-		if(pattedEntity.equals(senderPlayer)){
+		if (pattedEntity.equals(senderPlayer)) {
 			return;
 		}
 
@@ -100,7 +100,34 @@ public class PatPacketHandler implements IPacketHandler {
 			return;
 		}
 
-		if (senderPlayer.getLocation().distanceSquared(livingEntity.getLocation()) > GET_INTERACT_DISTANCE.apply(senderPlayer)){
+		Location senderLocation = senderPlayer.getEyeLocation();
+		double senderX = senderLocation.getX();
+		double senderY = senderLocation.getY();
+		double senderZ = senderLocation.getZ();
+		BoundingBox entityBox = livingEntity.getBoundingBox();
+		double interactDistance = GET_INTERACT_DISTANCE.apply(senderPlayer);
+
+		double dx = Math.min(
+				Math.abs(entityBox.getMaxX() - senderX),
+				Math.abs(entityBox.getMinX() - senderX)
+		);
+		if (dx > interactDistance) {
+			return;
+		}
+
+		double dz = Math.min(
+				Math.abs(entityBox.getMaxZ() - senderZ),
+				Math.abs(entityBox.getMinZ() - senderZ)
+		);
+		if (dz > interactDistance) {
+			return;
+		}
+
+		double dy = Math.min(
+				Math.abs(entityBox.getMaxY() - senderY),
+				Math.abs(entityBox.getMinY() - senderY)
+		);
+		if (dy > interactDistance) {
 			return;
 		}
 
