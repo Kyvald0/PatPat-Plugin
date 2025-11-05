@@ -16,10 +16,6 @@ base {
 repositories {
 	mavenCentral()
 	maven {
-		name = "spigotmc-repo"
-		url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-	}
-	maven {
 		name = "sonatype"
 		url = "https://oss.sonatype.org/content/groups/public/"
 	}
@@ -34,8 +30,8 @@ configurations {
 }
 
 dependencies {
-	// Spigot API
-	compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
+	// Folia API
+	compileOnly("dev.folia:folia-api:1.21.8-R0.1-SNAPSHOT")
 
 	// Lombok
 	compileOnly("org.projectlombok:lombok:${prop("lombok-version")}")
@@ -55,7 +51,7 @@ dependencies {
 	testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.0.0")
 }
 
-def mainJava = prop("java_version") as int
+def mainJava = 21
 def testJava = 21
 
 def mainJavaVersion = JavaVersion.toVersion(mainJava)

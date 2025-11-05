@@ -39,7 +39,7 @@ public class PatPacketHandler implements IPacketHandler {
 
 	private static Function<Player, Double> getInteractDistanceFunction() {
 		try {
-			Attribute attribute = Attribute.PLAYER_ENTITY_INTERACTION_RANGE;
+			Attribute attribute = Attribute.ENTITY_INTERACTION_RANGE;
 			return player -> {
 				AttributeInstance attr = player.getAttribute(attribute);
 				if (attr == null) {

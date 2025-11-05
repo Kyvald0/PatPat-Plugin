@@ -1,5 +1,7 @@
 package net.lopymine.patpat.plugin.packet;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -21,7 +23,7 @@ public record PatPacket(byte[] bytes, String channel) {
 	}
 
 	@Override
-	public String toString() {
+	public @NotNull String toString() {
 		return "PatPacket{" +
 				"bytes=" + Arrays.toString(bytes) +
 				", channel=" + channel +
